@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "thresholds": {"medium": 30, "high": 60},
+  "weights": {
+    "URGENCY": 15,
+    "PAYMENT_REQUEST": 20,
+    "CREDENTIAL_REQUEST": 25,
+    "OTP_REQUEST": 30,
+    "SUSPICIOUS_URL": 25,
+    "MISSPELLED_DOMAIN": 20,
+    "BRAND_IMPERSONATION": 15,
+    "WATCHLIST_MATCH": 60
+  }
+}
