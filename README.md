@@ -1,0 +1,88 @@
+# SageSense
+
+SageSense is an Android anti-scam companion designed for older adults. With explicit permission, it checks supported message notifications and incoming caller numbers, creates explainable risk events on-device, and offers a bilingual, citation-backed advisor.
+
+> Hackathon prototype: SageSense provides warnings, not legal, financial, or fraud determinations. It never automatically blocks a call or declares a payment safe.
+
+## Demo story
+
+1. A clearly labelled seeded bank-impersonation notification appears.
+2. The local Kotlin risk engine finds urgency, credential requests, and a suspicious domain.
+3. SageSense displays a high-priority warning and stores only a redacted structured event.
+4. The user opens the risk detail, sees plain-language evidence, and asks the Agent why it is risky.
+5. The FastAPI service uses DeepSeek V4 Flash with read-only tools and returns safe actions plus official citations.
+6. Personal Scam Memory relates similar recent events even when the sender changes.
+
+## Architecture
+
+```text
+NotificationListenerService ─┐
+                             ├─> local RiskAnalyzer ─> Room history ─> Compose UI
+CallScreeningService ────────┘          │                    │
+                                        └─ immediate alert    └─ redacted context
+                                                                    │
+                                                FastAPI + DeepSeek V4 Flash
+                                                read-only tools + citations
+```
+
+Risk verdicts are generated locally and remain available offline. The cloud Agent explains evidence; it does not control the phone.
+
+## Repository
+
+- `android/` — Kotlin, Jetpack Compose, Room, DataStore, notification and call-screening services.
+- `backend/` — FastAPI API, constrained DeepSeek tool loop, deterministic fallback, tests.
+- `knowledge/` — curated bilingual summaries with source metadata.
+- `docs/` — PRD, design divergence, testing, video, and submission material.
+
+Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), and [current test report](docs/test-report.md).
+
+## Run the backend
+
+Requires Python 3.12+.
+
+```bash
+python3.12 -m venv .venv
+source .venv/bin/activate
+pip install -e '.[dev]'
+cp backend/.env.example .env
+uvicorn backend.server:app --reload
+pytest
+```
+
+`DEEPSEEK_API_KEY` is optional for local development. Without it, `/v1/agent/query` returns a citation-backed deterministic fallback with `degraded: true`.
+
+For Vercel, import the repository and set `DEEPSEEK_API_KEY` as an encrypted environment variable. `pyproject.toml` declares `backend.server:app` as the FastAPI entrypoint.
+
+## Run Android
+
+The project uses JDK 17+, Android SDK 37, AGP 9.3, Gradle 9.5, and Compose BOM 2026.08.
+
+```bash
+cd android
+./gradlew testDebugUnitTest lintDebug assembleDebug
+```
+
+The emulator default backend URL is `http://10.0.2.2:8000/`. For a physical phone, provide the computer's LAN URL:
+
+```bash
+./gradlew assembleDebug -PSAGESENSE_API_BASE_URL=http://192.168.1.20:8000/
+```
+
+Install `android/app/build/outputs/apk/debug/app-debug.apk`, then grant notification access in the onboarding screen. On Android 10+, optionally grant the call-screening role. Calls are always allowed to continue ringing.
+
+The seeded phone number `+61 400 000 999` and `.example` domain are presentation fixtures, not claims about real entities.
+
+## Privacy and safety
+
+- Notification access is opt-in and restricted to supported packages.
+- OTP, card, and account-number patterns are redacted before persistence or Agent use.
+- At most 10 recent redacted summaries and 20 Watchlist entries are sent on an explicit Agent query.
+- The backend has no user database and does not persist request bodies.
+- Non-demo history is pruned after 30 days; users can delete it immediately.
+- Model outputs are validated, citation IDs are allowlisted, and safe actions require user confirmation.
+
+## Original blueprint and credits
+
+SageSense implements and deliberately adapts the **Sixth Sense** Product-thon blueprint created by **Billy Hermawan**. The supplied Figma/PDF files are not redistributed. See [design divergence](docs/divergence-log.md) and [third-party notices](THIRD_PARTY_NOTICES.md).
+
+Built for Cissa x CISSA Catalyst 2026 Track 3 by Yu Junteng, Jiahui Zhou, Yijia Sheng, Xiuning Gu, and Junteng Hu.
