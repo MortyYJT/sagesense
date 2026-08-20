@@ -1,0 +1,86 @@
+[
+  {
+    "id": "scamwatch-methods",
+    "title": "Methods scammers use",
+    "publisher": "National Anti-Scam Centre - Scamwatch",
+    "url": "https://www.scamwatch.gov.au/stop-check-protect/help-to-spot-and-avoid-scams/methods-scammers-use",
+    "published": "2026",
+    "accessed": "2026-08-20",
+    "tags": ["impersonation", "urgency", "emotion", "brand", "冒充", "紧迫", "情绪操纵"],
+    "summary_en": "Scammers commonly combine impersonation, urgency, and emotional pressure. Official-looking branding or caller information does not prove a message is genuine.",
+    "summary_zh": "诈骗者常把冒充身份、制造紧迫感和情绪压力结合使用。看似官方的品牌标识或来电信息并不能证明内容真实。",
+    "safe_actions": ["VERIFY_OFFICIAL_CHANNEL", "TALK_TO_TRUSTED_PERSON"]
+  },
+  {
+    "id": "scamwatch-types",
+    "title": "Types of scams",
+    "publisher": "National Anti-Scam Centre - Scamwatch",
+    "url": "https://www.scamwatch.gov.au/types-of-scams",
+    "published": "2026",
+    "accessed": "2026-08-20",
+    "tags": ["sms", "phone", "email", "phishing", "investment", "短信", "电话", "钓鱼", "投资"],
+    "summary_en": "Scam messages can imitate government, businesses, friends, or family. Phishing attempts try to obtain bank details, passwords, card numbers, or other personal information.",
+    "summary_zh": "诈骗信息可能冒充政府、企业、朋友或家人。网络钓鱼通常试图获取银行资料、密码、银行卡号或其他个人信息。",
+    "safe_actions": ["DO_NOT_CLICK", "DO_NOT_SHARE_CODE", "VERIFY_OFFICIAL_CHANNEL"]
+  },
+  {
+    "id": "acsc-spotting-scams",
+    "title": "Spotting scams",
+    "publisher": "Australian Signals Directorate's Australian Cyber Security Centre",
+    "url": "https://www.cyber.gov.au/protect-yourself/spotting-scams",
+    "published": "2026",
+    "accessed": "2026-08-20",
+    "tags": ["link", "phishing", "password", "banking", "verify", "链接", "密码", "银行", "核实"],
+    "summary_en": "Do not provide details through a link in an unexpected message. Open the organisation's official website yourself and use independently sourced contact details.",
+    "summary_zh": "不要通过意外信息中的链接提交资料。应自行打开机构官方网站，并使用独立找到的联系方式进行核实。",
+    "safe_actions": ["DO_NOT_CLICK", "VERIFY_OFFICIAL_CHANNEL", "CALL_OFFICIAL_NUMBER"]
+  },
+  {
+    "id": "acsc-recover-scams",
+    "title": "Report and recover from scams",
+    "publisher": "Australian Signals Directorate's Australian Cyber Security Centre",
+    "url": "https://www.cyber.gov.au/report-and-recover/recover-from/scams",
+    "published": "2026",
+    "accessed": "2026-08-20",
+    "tags": ["recovery", "money", "identity", "bank", "report", "补救", "转账", "身份", "银行", "报告"],
+    "summary_en": "If money was sent, contact the financial institution immediately. Stop communicating with the offender, preserve key details, and report the incident through the appropriate official channel.",
+    "summary_zh": "如果已经转账，应立即联系金融机构。停止与对方沟通，保存事件关键信息，并通过适当的官方渠道报告。",
+    "safe_actions": ["CONTACT_BANK", "REPORT_SCAM"]
+  },
+  {
+    "id": "ftc-older-adults-imposters",
+    "title": "False alarm, real scam: impersonation scams targeting older adults",
+    "publisher": "United States Federal Trade Commission",
+    "url": "https://www.ftc.gov/news-events/news/press-releases/2025/08/ftc-data-show-more-four-fold-increase-reports-impersonation-scammers-stealing-tens-even-hundreds",
+    "published": "2025-08",
+    "accessed": "2026-08-20",
+    "tags": ["older adults", "government", "business", "impersonation", "transfer", "老年人", "政府", "企业", "冒充", "转账"],
+    "summary_en": "Impersonation scams often invent an urgent account, crime, or computer-security problem and demand that money be moved to keep it safe. Verify using a number or website you already know is real.",
+    "summary_zh": "冒充诈骗经常虚构账户、犯罪或电脑安全紧急情况，并要求转移资金来“保障安全”。请使用你独立确认的真实号码或网站核实。",
+    "safe_actions": ["CALL_OFFICIAL_NUMBER", "CONTACT_BANK", "TALK_TO_TRUSTED_PERSON"]
+  },
+  {
+    "id": "ftc-older-adult-principles",
+    "title": "Guiding principles to help older adults spot fraud",
+    "publisher": "United States Federal Trade Commission",
+    "url": "https://consumer.ftc.gov/system/files/consumer_ftc_gov/pdf/Guiding%20Principles%20to%20Help%20Older%20Adults%20Spot%20Fraud.pdf",
+    "published": "2023",
+    "accessed": "2026-08-20",
+    "tags": ["older adults", "unexpected", "urgency", "payment", "gift card", "老年人", "意外联系", "紧迫", "付款"],
+    "summary_en": "Three recurring warning signs are unexpected contact, pressure to act quickly, and a demand to pay in a specific hard-to-reverse way. Slow down and check the story independently.",
+    "summary_zh": "三个常见警告信号是：意外联系、催促立刻行动，以及要求使用难以追回的特定付款方式。先停下来，独立核实对方说法。",
+    "safe_actions": ["TALK_TO_TRUSTED_PERSON", "VERIFY_OFFICIAL_CHANNEL"]
+  },
+  {
+    "id": "ic3-elder-fraud",
+    "title": "Elder Fraud",
+    "publisher": "FBI Internet Crime Complaint Center",
+    "url": "https://www.ic3.gov/CrimeInfo/ElderFraud",
+    "published": "2026",
+    "accessed": "2026-08-20",
+    "tags": ["elder fraud", "tech support", "family emergency", "report", "老年诈骗", "技术支持", "家庭紧急情况"],
+    "summary_en": "Older adults are targeted through tech-support, family-emergency, investment, and other online fraud schemes. Official reporting pages provide current alerts and recovery contacts.",
+    "summary_zh": "老年人可能成为技术支持、家庭紧急情况、投资等网络诈骗的目标。官方报告页面提供最新警示和补救联系方式。",
+    "safe_actions": ["REPORT_SCAM", "TALK_TO_TRUSTED_PERSON"]
+  }
+]
