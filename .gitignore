@@ -1,0 +1,31 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+local.properties
+*.jks
+*.keystore
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Android / Gradle
+.android-sdk/
+.jdk17/
+.gradle/
+.kotlin/
+**/build/
+captures/
+.idea/
+*.iml
+
+# macOS and local working material
+.DS_Store
+tmp/
+
+# Vercel
+.vercel/
