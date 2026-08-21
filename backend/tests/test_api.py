@@ -20,6 +20,17 @@ async def test_health_reports_model_without_exposing_secrets(monkeypatch) -> Non
     }
 
 
+def test_opencode_key_precedes_legacy_deepseek_key(monkeypatch) -> None:
+    monkeypatch.setenv("OPENCODE_API_KEY", "opencode-test-key")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "legacy-test-key")
+
+    service = AgentService()
+
+    assert service.api_key == "opencode-test-key"
+    assert service.base_url == "https://opencode.ai/zen/go/v1"
+    assert service.model == "deepseek-v4-flash"
+
+
 async def test_agent_endpoint_has_deterministic_offline_fallback(monkeypatch) -> None:
     monkeypatch.setattr(main, "agent_service", AgentService(api_key=""))
     async with AsyncClient(transport=ASGITransport(app=main.app), base_url="http://test") as client:

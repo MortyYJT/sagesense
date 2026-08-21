@@ -12,5 +12,6 @@
 | Static alerts | Expanded with history and Personal Scam Memory | Repeated campaigns often change sender identity | Helps users recognise a pattern, not only one message |
 | Single-language prototype | Expanded to English and Simplified Chinese | Improves access for multilingual older users | Content remains low-density in either language |
 | Stored message content | Changed to redacted structured events | Raw sensitive data is unnecessary for the demo | Privacy-by-default supports trust and informed consent |
+| Direct model-provider access | DeepSeek V4 Flash is called server-side through the team's OpenCode Go subscription | The subscription key is valid only at OpenCode Go's compatible endpoint and must never enter the APK | Provider routing is isolated behind FastAPI; local detection and deterministic guidance remain available if it fails |
 
 Original creator credit: **Billy Hermawan**, Sixth Sense Product-thon project. No original design assets are redistributed.

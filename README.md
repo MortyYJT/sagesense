@@ -10,7 +10,7 @@ SageSense is an Android anti-scam companion designed for older adults. With expl
 2. The local Kotlin risk engine finds urgency, credential requests, and a suspicious domain.
 3. SageSense displays a high-priority warning and stores only a redacted structured event.
 4. The user opens the risk detail, sees plain-language evidence, and asks the Agent why it is risky.
-5. The FastAPI service uses DeepSeek V4 Flash with read-only tools and returns safe actions plus official citations.
+5. The FastAPI service uses DeepSeek V4 Flash through OpenCode Go, with read-only tools, and returns safe actions plus official citations.
 6. Personal Scam Memory relates similar recent events even when the sender changes.
 
 ## Architecture
@@ -21,7 +21,8 @@ NotificationListenerService ─┐
 CallScreeningService ────────┘          │                    │
                                         └─ immediate alert    └─ redacted context
                                                                     │
-                                                FastAPI + DeepSeek V4 Flash
+                                                FastAPI + OpenCode Go
+                                                DeepSeek V4 Flash
                                                 read-only tools + citations
 ```
 
@@ -30,7 +31,7 @@ Risk verdicts are generated locally and remain available offline. The cloud Agen
 ## Repository
 
 - `android/` — Kotlin, Jetpack Compose, Room, DataStore, notification and call-screening services.
-- `backend/` — FastAPI API, constrained DeepSeek tool loop, deterministic fallback, tests.
+- `backend/` — FastAPI API, constrained model tool loop, deterministic fallback, tests.
 - `knowledge/` — curated bilingual summaries with source metadata.
 - `docs/` — PRD, design divergence, testing, video, and submission material.
 
@@ -49,9 +50,9 @@ uvicorn backend.server:app --reload
 pytest
 ```
 
-`DEEPSEEK_API_KEY` is optional for local development. Without it, `/v1/agent/query` returns a citation-backed deterministic fallback with `degraded: true`.
+`OPENCODE_API_KEY` is optional for local development. The service defaults to OpenCode Go's OpenAI-compatible endpoint and `deepseek-v4-flash`; `AGENT_BASE_URL` and `AGENT_MODEL` can override those non-secret settings. `DEEPSEEK_API_KEY` remains a temporary local migration fallback. Without a key, `/v1/agent/query` returns a citation-backed deterministic fallback with `degraded: true`.
 
-For Vercel, import the repository and set `DEEPSEEK_API_KEY` as an encrypted environment variable. `pyproject.toml` declares `backend.server:app` as the FastAPI entrypoint.
+For Vercel, import the repository and set `OPENCODE_API_KEY` as a Sensitive environment variable. Never put the key in the Android build or share it with teammates; they call the deployed SageSense backend instead. `pyproject.toml` declares `backend.server:app` as the FastAPI entrypoint.
 
 ## Run Android
 

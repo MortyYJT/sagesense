@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from backend.app.agent import AgentService, MODEL
+from backend.app.agent import AgentService
 from backend.app.schemas import AgentQueryRequest, AgentQueryResponse, HealthResponse
 
 
@@ -30,7 +30,7 @@ async def root() -> dict[str, str]:
 
 @app.get("/v1/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
-    return HealthResponse(model=MODEL, model_configured=bool(agent_service.api_key))
+    return HealthResponse(model=agent_service.model, model_configured=bool(agent_service.api_key))
 
 
 @app.post("/v1/agent/query", response_model=AgentQueryResponse)
