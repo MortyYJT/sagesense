@@ -10,17 +10,17 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 
 | Check | Command/evidence | Result |
 |---|---|---|
-| Backend | `.venv/bin/pytest -q backend/tests` | Pass: 22 tests, 0 failures |
+| Backend | `.venv/bin/pytest -q backend/tests` | Pass: 31 tests, 0 failures |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
-| Android JVM | `./gradlew testDebugUnitTest` | Pass: 35 tests, 0 failures/errors/skips |
+| Android JVM | `./gradlew testDebugUnitTest` | Pass: 42 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
 | Android APK | `./gradlew assembleDebug` | Pass: 21,454,010 bytes |
 | Static integrity | `git diff --check`, JSON/XML parsing, `unzip -t` | Pass |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `700562c24036fb906dfd3326701bc055eca8c7243dd80a4169179b5f82903af6`
+SHA-256: `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.
@@ -30,9 +30,12 @@ The generated APK targets the production demo backend at
 - Ten scam and ten benign English/Chinese risk-engine fixtures.
 - Watchlist matching, including equivalent Australian `0400…`, `614…`, and
   `+61 400…` formats.
-- OTP, card, account, phone and Agent-context redaction boundaries.
-- Deterministic anti-scam topic gating, prompt-extraction rejection, schema
-  bounds, rate limiting, model-output recovery and citation allowlisting.
+- Room-bound sender/snippet/URL minimisation, plus OTP, password, card, account,
+  email, phone and Agent-context redaction boundaries.
+- Independent FastAPI re-sanitisation, non-echoing validation errors, no-store
+  security headers, deterministic anti-scam topic gating (including nested
+  context), prompt-extraction rejection, schema bounds, rate limiting,
+  model-output recovery and citation allowlisting.
 - One-time permission-prompt policy and demo-readiness decisions.
 - Real-message, call and seeded-demo notification/channel policies in both
   languages.

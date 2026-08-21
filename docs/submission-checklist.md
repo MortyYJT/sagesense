@@ -2,15 +2,15 @@
 
 ## Build freeze
 
-- [x] Backend tests pass on Python 3.12 (22 tests, 2026-08-22).
+- [x] Backend tests pass on Python 3.12 (31 tests, 2026-08-22).
 - [x] Production Agent returns `degraded=false` through OpenCode Go without exposing its key.
-- [x] Current Android main source compiles and 35 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
-- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,454,010 bytes with SHA-256 `700562c24036fb906dfd3326701bc055eca8c7243dd80a4169179b5f82903af6`.
+- [x] Current Android main source compiles and 42 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
+- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,454,010 bytes with SHA-256 `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`.
 - [x] Emulator verifies overlay grant/deny/revoke, preview, auto-hide, tap-through, notification channel v4, manual check, two-event Scam Memory and Agent online/offline.
 - [ ] Fresh-install physical-device smoke test passes.
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.
 - [x] Seeded demo data is visibly labelled.
-- [ ] Public repository is readable while logged out.
+- [x] Public repository and raw README return successfully without authentication.
 - [ ] Final commit is tagged `catalyst-2026-submission`.
 - [ ] Repository remains unchanged during judging.
 
@@ -21,6 +21,8 @@
 - [x] `docs/divergence-log.md` records every material blueprint change.
 - [ ] Billy Hermawan and Sixth Sense are credited in README, pitch and final Devpost (credit is present in the prepared draft).
 - [x] Third-party APIs, libraries, sources, fonts and assets are listed.
+- [x] Prototype privacy notice, security statement and threat model disclose the
+  implemented controls and residual production risks.
 - [x] Supplied PDF/FIG and unlicensed original assets are absent from the tracked repository tree; recheck the final ZIP.
 
 ## Video

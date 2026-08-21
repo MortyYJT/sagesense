@@ -20,7 +20,7 @@ submission media remain Pending.
 | Personal Scam Memory | Implemented conservatively | Requires a stable campaign/domain or at least two meaningful signals |
 | Constrained Agent | Implemented | Production query passed; offline deterministic fallback passed |
 | Bilingual and older-adult UI | Implemented | English/Chinese and 1.3x/2.0x emulator checks pass; physical TalkBack Pending |
-| Privacy controls | Implemented for prototype | Local redaction, HTTPS release policy, bounded Agent context and no cloud history |
+| Privacy controls | Implemented for prototype | Minimized Room writes, backend re-sanitisation, HTTPS release policy, bounded Agent context, public notice/threat model and no cloud history |
 | Release build | Debug RC available | Final signing/tag is intentionally blocked on physical acceptance |
 
 ## Must finish to maximise competition score
@@ -84,9 +84,10 @@ the code freeze.
 4. **Platform compliance:** Google Play policy review for notification access,
    call-screening and `SYSTEM_ALERT_WINDOW`; OEM/device matrix testing; release
    signing, staged rollout and rollback.
-5. **Security and privacy:** formal threat model and data-protection assessment,
-   legal review, penetration testing, dependency/SBOM scanning, secret rotation,
-   abuse monitoring, retention verification and a user-facing privacy policy.
+5. **Security and privacy:** turn the current prototype threat model/privacy notice
+   into a legally reviewed data-protection assessment and production policy;
+   add penetration testing, dependency/SBOM scanning, encrypted local storage,
+   secret rotation, abuse monitoring and retention verification.
 6. **Reliable backend controls:** durable distributed rate limiting/WAF, service
    authentication or attestation, observability without sensitive payloads,
    SLOs, alerting, provider failover, cost ceilings and incident response.

@@ -105,7 +105,10 @@ and an always-on/resting overlay are outside the hackathon MVP.
 
 ## Data model
 
-`RiskEvent`: ID, source type, time, display sender, sender hash, redacted snippet, URLs/domains, signal codes, score, level, campaign ID, seeded-demo flag.
+`RiskEvent`: ID, source type, time, minimised display sender, an unused nullable
+legacy sender-hash slot, filtered evidence snippet, URL origins/domains, signal
+codes, score, level, campaign ID, seeded-demo flag. Current writes never retain a
+sender hash or a URL path/query/fragment.
 
 `WatchlistEntry`: ID, raw and normalised value, entity type, bilingual reason, source title/URL, last seen, seeded-demo flag.
 

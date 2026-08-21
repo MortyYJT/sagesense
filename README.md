@@ -47,7 +47,10 @@ full-screen intent.
 
 Before any provider call, the backend applies a deterministic anti-scam topic
 gate and rejects off-topic or prompt-extraction requests. Pydantic bounds cap
-the message and nested event payloads; a process-local best-effort limiter
+the message and nested event payloads. It also re-sanitises every client payload,
+removes untrusted sender/hash/full-URL fields, allowlists risk signals, and sends
+no-store security headers without echoing invalid request input. A process-local
+best-effort limiter
 allows 8 requests per minute and 2 concurrent requests per client. This is not
 a durable multi-instance boundary: production still needs Vercel WAF
 enforcement. The knowledge layer uses a small weighted bilingual lexical
@@ -61,7 +64,7 @@ no-match query produces no citations rather than unrelated sources.
 - `knowledge/` — curated bilingual summaries with source metadata.
 - `docs/` — PRD, design divergence, testing, video, and submission material.
 
-Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), [current test report](docs/test-report.md), [product-readiness audit](docs/product-readiness-audit.md), [physical-device runbook](docs/device-acceptance-runbook.md), and [Devpost draft](docs/devpost-draft.md).
+Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), [current test report](docs/test-report.md), [product-readiness audit](docs/product-readiness-audit.md), [privacy notice](PRIVACY.md), [security statement](SECURITY.md), [threat model](docs/threat-model.md), [physical-device runbook](docs/device-acceptance-runbook.md), and [Devpost draft](docs/devpost-draft.md).
 
 ## Run the backend
 
@@ -115,7 +118,7 @@ bubble. Notification channels were versioned to `v4` so the intended sound and
 vibration policy can take effect on installs that previously used an incompatible
 channel configuration.
 
-Current release-candidate evidence: 35 Android JVM tests and 22 backend tests
+Current release-candidate evidence: 42 Android JVM tests and 31 backend tests
 pass; Android lint reports 0 errors and 7 dependency/version-availability
 warnings; the production Agent returned `degraded=false`; and an Android 17
 emulator passed fresh-install, permission no-repeat, real Google Messages,
@@ -123,7 +126,7 @@ ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
 online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 
 The current debug APK is 21,454,010 bytes with SHA-256
-`700562c24036fb906dfd3326701bc055eca8c7243dd80a4169179b5f82903af6`.
+`e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
 15-second client deadline and never contain a provider key. See the
 [test report](docs/test-report.md) for the evidence boundary and the still-
@@ -152,12 +155,16 @@ from release builds. Follow the exact commands in the
 ## Privacy and safety
 
 - Notification access is opt-in and restricted to supported packages.
-- OTP, card, and account-number patterns are redacted before persistence or Agent use.
+- Before Room persistence, sender labels and evidence snippets are minimised;
+  phone/email/password/OTP/card/account patterns are redacted, stable sender
+  hashes are not retained, and links are reduced to scheme plus host.
 - Agent requests send redacted event context only: sender display names and sender
   hashes are omitted, phone Watchlist values are masked, and URL lists are not
   forwarded; a domain may be retained when it is needed to explain a risk.
 - At most 10 recent redacted summaries and 20 Watchlist entries are sent on an explicit Agent query.
 - The backend has no user database and does not persist request bodies.
+- The backend independently re-sanitises direct API input and strips untrusted
+  sender, hash and full-URL fields before any Agent tool or provider call.
 - Release builds require HTTPS; local cleartext endpoints are debug-only.
 - Agent requests are limited to 800 characters, bounded nested collections and
   redacted event fields; off-topic and prompt-extraction requests are stopped
@@ -170,6 +177,11 @@ from release builds. Follow the exact commands in the
 - Personal Scam Memory is a local similarity hint, not proof of a coordinated
   campaign: it requires the same campaign fingerprint, a shared normalised domain,
   or at least two meaningful risk signals, and only relates medium/high-risk events.
+
+Read the prototype [privacy notice](PRIVACY.md), [security statement](SECURITY.md),
+and [threat model](docs/threat-model.md) before using real-world data. Redaction
+is deterministic and heuristic; it reduces exposure but cannot identify every
+possible personal detail.
 
 ## Original blueprint and credits
 

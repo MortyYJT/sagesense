@@ -35,6 +35,13 @@ Personal Scam Memory as a conservative local similarity hint rather than a fraud
 determination. Notification channels are versioned to `v4` to avoid inheriting an
 older channel's user-muted configuration.
 
+The release privacy pass also minimises Room writes before persistence: it drops
+stable sender hashes, filters direct identifiers and password/OTP/card/account
+patterns from the evidence excerpt, and reduces stored links to their origin.
+FastAPI repeats this sanitisation for untrusted callers, uses non-echoing
+validation errors and no-store security headers, and applies prompt-injection
+checks to nested event/Watchlist context as well as the question.
+
 Physical call acceptance uses an ADB-only temporary caller fixture in debug
 builds because a normal second phone cannot safely spoof the fixed seeded number.
 The component requires Android's signature-level `DUMP` permission, accepts only
