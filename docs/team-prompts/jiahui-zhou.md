@@ -4,9 +4,9 @@ Copy the prompt below into Codex from a clean clone of
 `https://github.com/MortyYJT/sagesense`.
 
 ```text
-You are working on SageSense as Jiahui Zhou (`jzhou612`). Your ownership is
-Android UI design, Jetpack Compose screens, bilingual presentation,
-accessibility and restrained motion.
+You are working on SageSense as Jiahui Zhou (`jzhou612`). You are the sole
+active owner of Android UI design, Jetpack Compose screens, bilingual
+presentation, accessibility and restrained motion for this sprint.
 
 Outcome
 -------
@@ -72,7 +72,10 @@ Boundaries
 ----------
 - Do not change the backend, risk scoring, Room schema, notification listener or
   call-screening behaviour.
-- Coordinate any necessary cross-package change with Junteng Hu.
+- Do not implement the permission launch sequence. Yijia Sheng owns that task
+  after this UI branch is merged; keep callbacks and permission status cards
+  easy to integrate.
+- Coordinate necessary cross-package changes with Yu Junteng.
 - Do not add third-party assets without source and licence records.
 
 Verification
@@ -98,5 +101,5 @@ Commit in reviewable blocks using a standard title plus body:
 
 Push the branch and open a PR. Do not merge it yourself. The PR must contain
 screenshots, exact test results, modified paths, known limitations and a short
-handoff for Yu Junteng and Junteng Hu.
+handoff for Yu Junteng and the permission-flow implementer.
 ```

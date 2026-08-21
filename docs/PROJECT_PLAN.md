@@ -1,18 +1,18 @@
 # SageSense delivery plan
 
-Last updated: Thursday, 20 August 2026 (Melbourne time)
+Last updated: Friday, 21 August 2026, 15:15 AEST
 
 ## Team responsibilities
 
 | Member | GitHub | Primary responsibility | Required hand-off |
 |---|---|---|---|
-| Yu Junteng | `MortyYJT` | Team lead; FastAPI, DeepSeek Agent, data contracts, knowledge structure, integration and Devpost | Stable `/v1/agent/query`, deployed URL and final submission |
-| Jiahui Zhou | `jzhou612` | UI design, Compose screens, bilingual copy, accessibility and motion | Approved screen states, reusable Compose components and accessibility review |
-| Yijia Sheng | `sarahkaliyah` | PRD, divergence log, source register, test set, integration QA and submission ZIP | Current docs, signed test report and clean submission archive |
+| Yu Junteng | `MortyYJT` | Team lead; FastAPI, OpenCode Go Agent, data contracts, Android integration, release APK and Devpost | Stable `/v1/agent/query`, merged build, deployed URL and final submission |
+| Jiahui Zhou | `jzhou612` | Sole active UI owner: Compose screens, bilingual copy, accessibility and restrained motion | Reviewable UI branch, screenshots and accessibility evidence |
+| Yijia Sheng | `sarahkaliyah` | First-launch permission setup, device QA, PRD, divergence log, source register and submission ZIP | Permission flow PR, signed device test report and clean submission archive |
 | Xiuning Gu | `xiuningg` | Storyboard, screen recording, editing, subtitles, publishing and final pitch | Reusable real-device clips, final 4:30 video and presentation script |
-| Junteng Hu | `H0sst` | Android architecture, system services, permissions, Room, networking, APK and physical-device testing | Installable APK and device evidence for notifications and calls |
+| Junteng Hu | `H0sst` | Unavailable for the current delivery sprint | No implementation or review task assigned |
 
-Jiahui Zhou and Junteng Hu jointly own Compose implementation. Yu Junteng and Yijia Sheng jointly own the API contract and Agent evaluation fixtures. Xiuning Gu should collect real functional clips throughout development rather than waiting for the final edit.
+Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit `Screens.kt` until Jiahui's UI work is merged; she can prepare permission acceptance cases meanwhile. Yu Junteng owns integration and resolves the small permission/UI seam after both hand-offs. Xiuning Gu should collect working clips throughout development rather than waiting for the final edit.
 
 ## Current progress
 
@@ -22,13 +22,16 @@ Jiahui Zhou and Junteng Hu jointly own Compose implementation. Yu Junteng and Yi
 - Notification listener, call-screening service, local risk engine, Watchlist, Personal Scam Memory and deep-linked alerts are implemented.
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
+- The backend is deployed at `https://sagesense.vercel.app`; a Sensitive `OPENCODE_API_KEY` routes DeepSeek V4 Flash through OpenCode Go. A production query returned `degraded=false` with allowlisted citations.
+- An Android emulator is connected as `emulator-5554`. No physical phone has been verified yet.
 - Curated bilingual knowledge cards, PRD, design-divergence record, source register, test report, video script and submission checklist exist.
-- Backend tests pass: 9. Android JVM tests, lint and debug APK build pass.
+- Backend tests pass: 10. Android JVM tests, lint and debug APK build passed on the previous baseline.
 
 ### Still required
 
+- Complete the first-launch permission prompt and its allow, deny, back and re-entry states.
 - Connect a physical Android phone and complete notification, call role, offline, TalkBack, large-text and delete-history checks.
-- Configure a server-side `DEEPSEEK_API_KEY`, deploy FastAPI to Vercel and verify the real DeepSeek response path.
+- Build the APK with `https://sagesense.vercel.app/` and verify the Android-to-Agent path on-device.
 - Review and polish the Compose UI against Jiahui's final design decisions.
 - Capture real-device clips, complete the video, prepare Devpost, build the clean ZIP and test every public link while logged out.
 
@@ -36,18 +39,16 @@ Jiahui Zhou and Junteng Hu jointly own Compose implementation. Yu Junteng and Yi
 
 ### Friday, 21 August
 
-**Morning**
+**15:15–16:00 — parallel preparation**
 
-- Five-person sync: read the PRD, this plan, divergence log and test report; raise blockers before coding.
-- Junteng Hu connects a physical phone and owns the first APK install and permission walkthrough.
-- Jiahui Zhou reviews the existing Compose screens and records priority UI/accessibility changes.
-- Yu Junteng deploys the backend and validates the Android-to-Agent contract.
-- Yijia Sheng converts the acceptance criteria into a device test run sheet.
-- Xiuning Gu finalises the storyboard and records any already-working real-device clips.
+- Jiahui Zhou continues the UI/accessibility branch without changing permission launch behaviour.
+- Yijia Sheng prepares permission cases and a physical-device run sheet; after Jiahui's merge she implements the first-launch setup flow.
+- Yu Junteng freezes the deployed Agent contract, prepares the production-base-URL APK and connects a physical phone.
+- Xiuning Gu locks the 4:30 storyboard, file naming and subtitle template; emulator clips may be used as temporary edit placeholders only.
 
-**Afternoon, with first integration from 16:00–19:00**
+**16:00–19:00 — first physical-device integration**
 
-- Complete notification → risk detail → history → cited Agent answer on the physical phone.
+- Complete first launch → permissions → notification → risk detail → history → cited Agent answer on the physical phone.
 - Validate bilingual copy, source citations, offline/degraded behaviour and Personal Scam Memory.
 - Save the first usable screen recordings before the end of the day.
 
