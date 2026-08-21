@@ -1,5 +1,6 @@
 package com.mortyyjt.sagesense.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,7 @@ data class SageSenseUiState(
     val locale: String = "en-AU",
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val onboardingComplete: Boolean = false,
+    val permissionSetupPromptSeen: Boolean = false,
     val ready: Boolean = false,
 )
 
@@ -34,19 +36,27 @@ sealed interface AgentUiState {
 }
 
 class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
+    private val storedPreferences = combine(
+        container.preferences.language,
+        container.preferences.onboardingComplete,
+        container.preferences.permissionSetupPromptSeen,
+        container.preferences.themeMode,
+    ) { locale, onboarding, permissionPromptSeen, themeMode ->
+        StoredPreferences(locale, onboarding, permissionPromptSeen, themeMode)
+    }
+
     val uiState: StateFlow<SageSenseUiState> = combine(
         container.riskRepository.events,
         container.riskRepository.watchlist,
-        container.preferences.language,
-        container.preferences.onboardingComplete,
-        container.preferences.themeMode,
-    ) { events, watchlist, locale, onboarding, themeMode ->
+    ) { events, watchlist -> events to watchlist }
+        .combine(storedPreferences) { (events, watchlist), preferences ->
         SageSenseUiState(
             events = events,
             watchlist = watchlist,
-            locale = locale,
-            themeMode = ThemeMode.fromStorage(themeMode),
-            onboardingComplete = onboarding,
+            locale = preferences.locale,
+            themeMode = ThemeMode.fromStorage(preferences.themeMode),
+            onboardingComplete = preferences.onboardingComplete,
+            permissionSetupPromptSeen = preferences.permissionSetupPromptSeen,
             ready = true,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SageSenseUiState())
@@ -64,6 +74,10 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
 
     fun completeOnboarding() {
         viewModelScope.launch { container.preferences.completeOnboarding() }
+    }
+
+    fun markPermissionSetupPromptSeen() {
+        viewModelScope.launch { container.preferences.markPermissionSetupPromptSeen() }
     }
 
     fun clearHistory() {
@@ -87,6 +101,9 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
                 recentEvents = state.events.filterNot { it.id == activeEventId }.take(10),
                 watchlist = state.watchlist,
             )
+            result.exceptionOrNull()?.let { error ->
+                Log.w("SageSenseAgent", "Agent request failed: ${error.javaClass.simpleName}: ${error.message}")
+            }
             _agentState.value = result.fold(
                 onSuccess = { AgentUiState.Success(it) },
                 onFailure = { AgentUiState.Error(agentFailureMessage(mapAgentFailure(it), state.locale)) },
@@ -101,3 +118,10 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
         }
     }
 }
+
+private data class StoredPreferences(
+    val locale: String,
+    val onboardingComplete: Boolean,
+    val permissionSetupPromptSeen: Boolean,
+    val themeMode: String,
+)
