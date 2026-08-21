@@ -2,7 +2,8 @@
 
 ## Build freeze
 
-- [x] Backend tests pass on Python 3.12 (9 tests, 2026-08-20).
+- [x] Backend tests pass on Python 3.12 (10 tests, 2026-08-21).
+- [x] Production Agent returns `degraded=false` through OpenCode Go without exposing its key.
 - [x] Android unit tests, lint and debug APK build pass (2026-08-20).
 - [ ] Fresh-install physical-device smoke test passes.
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.

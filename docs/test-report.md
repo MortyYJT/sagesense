@@ -6,23 +6,28 @@ Last automated run: 2026-08-21 (Australia/Melbourne)
 
 | Check | Command | Result |
 |---|---|---|
-| Backend | `.venv/bin/pytest -q` | Pass: 9 tests |
+| Backend | `.venv/bin/pytest -q backend/tests` | Pass: 22 tests (2026-08-21 local run) |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
+| OpenCode Go catalog | Authenticated `GET /zen/go/v1/models` | Pass: `deepseek-v4-flash` available; secret not printed |
+| Production Agent | `POST https://sagesense.vercel.app/v1/agent/query` with seeded redacted event | Pass: HTTP 200, `degraded=false`, high risk, actions and 4 allowlisted citations |
 | Knowledge and weight JSON | `python -m json.tool ...` | Pass |
-| Android JVM tests | `./gradlew testDebugUnitTest` | Pass: 8 test methods, including theme-mode fallback plus 10 scam and 10 benign fixtures |
-| Android lint | `./gradlew lintDebug` | Pass: 0 errors; 9 non-blocking version/unused-resource warnings |
+| Android JVM tests | `./gradlew testDebugUnitTest` | Pass: 11 tests, 0 failures, including Agent failure mapping, theme-mode fallback, redaction and bilingual risk fixtures |
+| Android lint | `./gradlew lintDebug` | Pass: 0 errors |
 | Android APK | `./gradlew assembleDebug` | Pass: 21 MiB debug APK |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `3fa8497999b08f9bf019cb3d0dc7d08b0da7341d81291488c047e73fd2e4bdaa`
+SHA-256: `e41bae13a1ba026a715f6f57d575803bbf991449beac06b30aa245cc7e6632d8`
 
-ADB 37.0.1 connected to the Android 17 `sdk_gphone64_arm64` emulator. Emulator evidence is recorded separately from the physical-device checks below.
+ADB 37.0.1 reports the Android 17 `sdk_gphone64_arm64` emulator as authorised. Emulator evidence is recorded separately; no physical Android phone has been connected.
 
 ## Automated coverage
 
 - Backend health response and secret-safe configuration status.
 - Backend request bounds and deterministic offline response.
+- Deterministic topic gate rejects off-topic and prompt-extraction requests before a provider call.
+- Process-local rate limiting returns `429` with `Retry-After`, and bounds/evicts client buckets.
+- Weighted bilingual lexical knowledge search is stable, applies limits, and returns no citations on no-match.
 - Agent JSON recovery and allowlisted citation hydration.
 - Personal Scam Memory campaign comparison and Watchlist normalisation.
 - Kotlin risk engine: 10 scam and 10 benign English/Chinese fixtures.
@@ -60,11 +65,13 @@ ADB 37.0.1 connected to the Android 17 `sdk_gphone64_arm64` emulator. Emulator e
 | Scenario | Expected | Status |
 |---|---|---|
 | Fresh install and optional onboarding permissions | User can continue without enabling every protection; unavailable protections show OFF | Pending physical device |
+| Permission dialog no-repeat | Skipping/completing setup does not auto-open it on every later launch | Pending; code review found this needs explicit verification |
 | Seeded notification | Medium/high event appears with deep-linked warning | Pending physical device |
 | Notification access disabled | Notification protection shows OFF while Home, History and Learn remain available | Pending physical device |
 | Seeded Watchlist call | Call rings; warning appears within system deadline | Pending physical device |
 | Call role denied with “Don’t ask again” | Allow opens Default apps recovery; copy directs the user to Caller ID & spam app and SageSense | Pending physical device |
-| Backend online | Agent returns answer, actions and official citations | Pending API key/deployment |
+| Backend production direct | Agent returns answer, actions and official citations | Pass on 2026-08-21; OpenCode Go / DeepSeek V4 Flash; `degraded=false` |
+| Android → backend online | Installed app returns answer, actions and official citations | Pending physical device |
 | Backend offline/timeout | Local detection remains; UI shows connection-safe failure | Pending physical device |
 | English ↔ Chinese | Primary UI and Agent locale switch without restart | Pending physical device |
 | TalkBack and system large text | Controls remain labelled, readable and tappable | Pending physical device |

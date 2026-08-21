@@ -9,13 +9,14 @@ from typing import Any
 from openai import AsyncOpenAI
 from pydantic import ValidationError
 
+from backend.app.guardrails import TopicDecision, classify_topic, safety_boundary_response
 from backend.app.knowledge import KnowledgeRepository
 from backend.app.schemas import AgentQueryRequest, AgentQueryResponse, ModelAnswer, RiskLevel
 from backend.app.tools import AgentTools, TOOL_SPECS, default_action_codes, safe_actions
 
 
-MODEL = "deepseek-v4-flash"
-BASE_URL = "https://api.deepseek.com"
+DEFAULT_MODEL = "deepseek-v4-flash"
+DEFAULT_BASE_URL = "https://opencode.ai/zen/go/v1"
 logger = logging.getLogger(__name__)
 
 
@@ -35,11 +36,17 @@ class AgentService:
         knowledge: KnowledgeRepository | None = None,
         client: AsyncOpenAI | None = None,
         api_key: str | None = None,
+        model: str | None = None,
+        base_url: str | None = None,
     ) -> None:
         self.knowledge = knowledge or KnowledgeRepository()
-        self.api_key = api_key if api_key is not None else os.getenv("DEEPSEEK_API_KEY", "")
+        self.api_key = api_key if api_key is not None else (
+            os.getenv("OPENCODE_API_KEY") or os.getenv("DEEPSEEK_API_KEY", "")
+        )
+        self.model = model or os.getenv("AGENT_MODEL", DEFAULT_MODEL)
+        self.base_url = base_url or os.getenv("AGENT_BASE_URL", DEFAULT_BASE_URL)
         self.client = client or (
-            AsyncOpenAI(api_key=self.api_key, base_url=BASE_URL, timeout=8.0, max_retries=0)
+            AsyncOpenAI(api_key=self.api_key, base_url=self.base_url, timeout=8.0, max_retries=0)
             if self.api_key
             else None
         )
@@ -90,7 +97,7 @@ class AgentService:
         if self.client is None:
             raise RuntimeError("DeepSeek client is not configured")
         completion = await self.client.chat.completions.create(
-            model=MODEL,
+            model=self.model,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": self._no_tool_context(request)},
@@ -160,6 +167,12 @@ class AgentService:
         )
 
     async def answer(self, request: AgentQueryRequest) -> AgentQueryResponse:
+        # Keep the product boundary deterministic and before any provider call.
+        # This also prevents prompt-extraction requests from spending API budget.
+        topic_decision = classify_topic(request)
+        if topic_decision != TopicDecision.ALLOW:
+            return safety_boundary_response(request, topic_decision)
+
         if self.client is None:
             return self.deterministic_response(request)
 
@@ -171,7 +184,7 @@ class AgentService:
         try:
             for _ in range(3):
                 completion = await self.client.chat.completions.create(
-                    model=MODEL,
+                    model=self.model,
                     messages=messages,
                     tools=TOOL_SPECS,
                     tool_choice="auto",
@@ -196,7 +209,7 @@ class AgentService:
                 break
         except (Exception, ValidationError, json.JSONDecodeError) as exc:
             logger.warning(
-                "DeepSeek tool-call attempt failed: type=%s status=%s",
+                "Model-provider tool-call attempt failed: type=%s status=%s",
                 type(exc).__name__,
                 getattr(exc, "status_code", None),
             )
@@ -208,7 +221,7 @@ class AgentService:
             return await self._answer_without_tools(request)
         except (Exception, ValidationError, json.JSONDecodeError) as exc:
             logger.warning(
-                "DeepSeek JSON-only fallback failed: type=%s status=%s",
+                "Model-provider JSON-only fallback failed: type=%s status=%s",
                 type(exc).__name__,
                 getattr(exc, "status_code", None),
             )

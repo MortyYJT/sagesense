@@ -20,7 +20,7 @@ android {
         vectorDrawables.useSupportLibrary = true
 
         val apiBaseUrl = providers.gradleProperty("SAGESENSE_API_BASE_URL")
-            .orElse("http://10.0.2.2:8000/")
+            .orElse("https://sagesense.vercel.app/")
             .get()
         buildConfigField("String", "SAGESENSE_API_BASE_URL", "\"$apiBaseUrl\"")
     }

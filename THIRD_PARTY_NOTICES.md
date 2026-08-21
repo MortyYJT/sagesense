@@ -11,7 +11,8 @@ SageSense source code is released under the MIT License. Dependencies retain the
 
 ## Services
 
-- DeepSeek API, accessed from the server only. Model: `deepseek-v4-flash`. Use is governed by DeepSeek's current API terms and pricing.
+- OpenCode Go, accessed from the server only through its OpenAI-compatible endpoint. It routes the selected `deepseek-v4-flash` model. Use is governed by OpenCode Go's subscription terms and current model/provider privacy disclosures.
+- DeepSeek V4 Flash is the selected underlying model. SageSense does not embed either provider credential in the Android app.
 - Vercel Functions, optional deployment target for the FastAPI service.
 
 ## Typeface

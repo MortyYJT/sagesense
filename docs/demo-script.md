@@ -14,7 +14,7 @@ On a real phone, press **Send seeded demo scam**. Show the clearly labelled noti
 
 ## 1:40–2:35 — History, memory and Agent
 
-Open history and the selected event. Show Personal Scam Memory relating a changed sender to a recent campaign. Ask “Why is this risky?” Show the concise answer, actions and official source links. Mention DeepSeek V4 Flash and the deterministic fallback.
+Open history and the selected event. Show Personal Scam Memory relating a changed sender to a recent campaign. Ask “Why is this risky?” Show the concise answer, actions and official source links. Mention that the server routes DeepSeek V4 Flash through OpenCode Go, while deterministic guidance remains available if the provider cannot be reached.
 
 ## 2:35–3:10 — Call warning
 
@@ -26,7 +26,7 @@ Switch to Chinese, open a Learn card, and demonstrate large text, high contrast,
 
 ## 3:40–4:15 — Architecture and privacy
 
-Show the architecture diagram. Explain local rules, Room, redaction, explicit Agent queries, no user database, allowlisted citations and user-confirmed actions.
+Show the architecture diagram. Explain local rules, Room, redaction, explicit Agent queries, no user database, the server-only OpenCode Go key, allowlisted citations and user-confirmed actions.
 
 ## 4:15–4:30 — Impact and credits
 

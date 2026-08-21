@@ -13,5 +13,6 @@
 | Single-language prototype | Expanded to English and Simplified Chinese | Improves access for multilingual older users | Content remains low-density in either language |
 | Generic system sans-serif typography on FAQ & Safety | Changed to Atkinson Hyperlegible for supported Latin text, with Android system CJK fallback | More distinguishable Latin letterforms improve readability; the fallback keeps Chinese complete and legible | The typeface is scoped to the new FAQ & Safety page so existing screens retain their established typography |
 | Stored message content | Changed to redacted structured events | Raw sensitive data is unnecessary for the demo | Privacy-by-default supports trust and informed consent |
+| Direct model-provider access | DeepSeek V4 Flash is called server-side through the team's OpenCode Go subscription | The subscription key is valid only at OpenCode Go's compatible endpoint and must never enter the APK | Provider routing is isolated behind FastAPI; local detection and deterministic guidance remain available if it fails |
 
 Original creator credit: **Billy Hermawan**, Sixth Sense Product-thon project. No original design assets are redistributed.
