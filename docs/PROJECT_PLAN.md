@@ -24,12 +24,13 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
 - The backend is deployed at `https://sagesense.vercel.app`; a Sensitive `OPENCODE_API_KEY` routes DeepSeek V4 Flash through OpenCode Go. A production query returned `degraded=false` with allowlisted citations.
 - An Android emulator is connected as `emulator-5554`. No physical phone has been verified yet.
+- Yijia Sheng's `ba2eae5` adds a unified permission setup dialog on `main`. Unit tests, lint and APK assembly pass, but repeat-prompt behaviour, first-launch persistence and accessibility still need acceptance testing.
 - Curated bilingual knowledge cards, PRD, design-divergence record, source register, test report, video script and submission checklist exist.
 - Backend tests pass: 10. Android JVM tests, lint and debug APK build passed on the previous baseline.
 
 ### Still required
 
-- Complete the first-launch permission prompt and its allow, deny, back and re-entry states.
+- Harden the first-launch permission prompt and verify its allow, deny, back, skip, no-repeat and Settings re-entry states.
 - Connect a physical Android phone and complete notification, call role, offline, TalkBack, large-text and delete-history checks.
 - Build the APK with `https://sagesense.vercel.app/` and verify the Android-to-Agent path on-device.
 - Review and polish the Compose UI against Jiahui's final design decisions.
@@ -42,7 +43,7 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 **15:15–16:00 — parallel preparation**
 
 - Jiahui Zhou continues the UI/accessibility branch without changing permission launch behaviour.
-- Yijia Sheng prepares permission cases and a physical-device run sheet; after Jiahui's merge she implements the first-launch setup flow.
+- Yijia Sheng reviews her existing permission dialog against the fresh-install, no-repeat and accessibility criteria and prepares the device run sheet.
 - Yu Junteng freezes the deployed Agent contract, prepares the production-base-URL APK and connects a physical phone.
 - Xiuning Gu locks the 4:30 storyboard, file naming and subtitle template; emulator clips may be used as temporary edit placeholders only.
 

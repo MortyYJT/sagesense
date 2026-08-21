@@ -10,6 +10,8 @@ Snapshot: Friday, 21 August 2026, 15:15 AEST.
 - [x] `https://sagesense.vercel.app/v1/agent/query` returned `degraded=false`
   with safe actions and allowlisted citations.
 - [x] Android emulator `emulator-5554` is authorised.
+- [x] Yijia's unified permission dialog is on `main` as `ba2eae5`; Android unit
+  tests, lint and APK assembly pass.
 - [ ] Physical Android phone is connected and authorised.
 - [ ] Jiahui's UI branch or draft PR is visible remotely.
 
@@ -17,8 +19,9 @@ Snapshot: Friday, 21 August 2026, 15:15 AEST.
 
 - [ ] **Jiahui:** finish core-screen UI/accessibility pass; push branch and draft
   PR with English/Chinese screenshots.
-- [ ] **Yijia:** prepare permission acceptance matrix; after Jiahui's merge,
-  implement the one-time first-launch explanation and sequential permission flow.
+- [ ] **Yijia:** prepare the permission acceptance matrix; after coordinating a
+  non-overlapping edit window, fix repeat prompting and accessibility in the
+  existing `ba2eae5` implementation.
 - [ ] **Yu:** review and merge without overwriting either branch; build with
   `-PSAGESENSE_API_BASE_URL=https://sagesense.vercel.app/`.
 - [ ] **Yu + Yijia:** fresh-install on a real phone and verify allow, deny, back,
@@ -63,10 +66,11 @@ Snapshot: Friday, 21 August 2026, 15:15 AEST.
 
 ## Merge order
 
-1. Backend/provider configuration and this task board.
-2. Jiahui UI branch.
-3. Yijia permission branch based on the merged UI.
-4. Yu's integration/test-evidence fixes.
-5. Documentation/video finalisation and release tag.
+1. Yijia's existing permission-dialog commit `ba2eae5`.
+2. Backend/provider configuration and this task board.
+3. Jiahui UI branch rebased onto both.
+4. Yijia permission-hardening branch after the UI editing window closes.
+5. Yu's integration/test-evidence fixes.
+6. Documentation/video finalisation and release tag.
 
 Junteng Hu has no current task. Do not wait for his branch or review.

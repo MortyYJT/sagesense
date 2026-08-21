@@ -17,7 +17,10 @@ or replace working data, service, navigation or Agent integrations.
 Before editing
 --------------
 1. Fetch `origin/main`, inspect `git status`, and preserve all existing and
-   unrelated work. Stop and report any overlapping uncommitted changes.
+   unrelated work. `main` now contains Yijia Sheng's permission dialog commit
+   `ba2eae5`; rebase your UI branch onto it before continuing. Stop and report
+   any overlapping uncommitted changes. Do not restore an older `Screens.kt`
+   over the permission dialog.
 2. Create branch `codex/jiahui-ui-accessibility`.
 3. Read, in order:
    - `docs/PRD.md`
@@ -72,9 +75,9 @@ Boundaries
 ----------
 - Do not change the backend, risk scoring, Room schema, notification listener or
   call-screening behaviour.
-- Do not implement the permission launch sequence. Yijia Sheng owns that task
-  after this UI branch is merged; keep callbacks and permission status cards
-  easy to integrate.
+- Do not remove or rewrite the permission launch sequence from `ba2eae5`.
+  Yijia Sheng owns its behaviour fixes. You may style its dialog using the same
+  typography and 56dp rules, but keep callbacks and state handling intact.
 - Coordinate necessary cross-package changes with Yu Junteng.
 - Do not add third-party assets without source and licence records.
 
