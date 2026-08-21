@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.flow.first
 
 class SageCallScreeningService : CallScreeningService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -26,12 +27,15 @@ class SageCallScreeningService : CallScreeningService() {
             return
         }
 
+        // Always allow the call immediately. The warning is informational and must
+        // never make the telecom screening path wait for storage or network work.
+        respondToCall(callDetails, response)
+
         val app = application as SageSenseApplication
         serviceScope.launch {
             val match = withTimeoutOrNull(3_000) {
                 app.container.database.watchlistDao().findNormalised(RiskAnalyzer.normaliseEntity(number))
             }
-            respondToCall(callDetails, response)
             if (match != null) {
                 val event = app.container.riskRepository.analyseAndStore(
                     sourceType = "call",
@@ -39,7 +43,8 @@ class SageCallScreeningService : CallScreeningService() {
                     text = "Incoming caller matched the local Risk Watchlist: ${match.reasonEn}",
                     seededDemoData = match.seededDemoData,
                 )
-                AlertNotifier.showRisk(this@SageCallScreeningService, event, "This call may be unsafe")
+                val locale = app.container.preferences.language.first()
+                AlertNotifier.showRisk(this@SageCallScreeningService, event, locale = locale)
             }
         }
     }

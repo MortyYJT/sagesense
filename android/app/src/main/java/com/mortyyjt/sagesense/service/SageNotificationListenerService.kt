@@ -8,13 +8,18 @@ import com.mortyyjt.sagesense.risk.RiskLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SageNotificationListenerService : NotificationListenerService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
-        if (sbn == null || sbn.notification.channelId == AlertNotifier.ALERT_CHANNEL) return
+        if (
+            sbn == null ||
+            AlertNotifier.isSageSenseRiskChannel(sbn.notification.channelId) ||
+            sbn.notification.extras.getBoolean(AlertNotifier.RISK_OUTPUT_EXTRA, false)
+        ) return
         val allowedPackages = setOf(
             "com.google.android.apps.messaging",
             "com.android.mms",
@@ -38,7 +43,10 @@ class SageNotificationListenerService : NotificationListenerService() {
                 text = text,
                 seededDemoData = sbn.notification.channelId == AlertNotifier.DEMO_CHANNEL,
             )
-            if (event.riskLevel != RiskLevel.LOW) AlertNotifier.showRisk(this@SageNotificationListenerService, event)
+            if (event.riskLevel != RiskLevel.LOW) {
+                val locale = app.container.preferences.language.first()
+                AlertNotifier.showRisk(this@SageNotificationListenerService, event, locale = locale)
+            }
         }
     }
 }
