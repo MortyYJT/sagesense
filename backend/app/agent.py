@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 from typing import Any
@@ -15,6 +16,7 @@ from backend.app.tools import AgentTools, TOOL_SPECS, default_action_codes, safe
 
 MODEL = "deepseek-v4-flash"
 BASE_URL = "https://api.deepseek.com"
+logger = logging.getLogger(__name__)
 
 
 SYSTEM_PROMPT = """You are SageSense, a calm bilingual anti-scam advisor for older adults.
@@ -192,13 +194,22 @@ class AgentService:
                 if message.content:
                     return self._hydrate(self._parse_json(message.content), request, degraded=False)
                 break
-        except (Exception, ValidationError, json.JSONDecodeError):
-            pass
+        except (Exception, ValidationError, json.JSONDecodeError) as exc:
+            logger.warning(
+                "DeepSeek tool-call attempt failed: type=%s status=%s",
+                type(exc).__name__,
+                getattr(exc, "status_code", None),
+            )
 
         # Tool/API/output failures get one smaller JSON-only DeepSeek attempt with
         # deterministic knowledge already retrieved. If that also fails, the
         # local bilingual evidence template remains available.
         try:
             return await self._answer_without_tools(request)
-        except (Exception, ValidationError, json.JSONDecodeError):
+        except (Exception, ValidationError, json.JSONDecodeError) as exc:
+            logger.warning(
+                "DeepSeek JSON-only fallback failed: type=%s status=%s",
+                type(exc).__name__,
+                getattr(exc, "status_code", None),
+            )
             return self.deterministic_response(request)
