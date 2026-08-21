@@ -141,7 +141,9 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
                 watchlist = state.watchlist,
             )
             result.exceptionOrNull()?.let { error ->
-                Log.w("SageSenseAgent", "Agent request failed: ${error.javaClass.simpleName}: ${error.message}")
+                // Exception messages may contain provider response fragments.
+                // Keep logcat useful without writing potentially sensitive text.
+                Log.w("SageSenseAgent", "Agent request failed: ${error.javaClass.simpleName}")
             }
             _agentState.value = result.fold(
                 onSuccess = { AgentUiState.Success(it) },

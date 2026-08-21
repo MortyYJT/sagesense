@@ -88,7 +88,17 @@ def classify_topic(request: AgentQueryRequest) -> TopicDecision:
     """Return the deterministic allow/reject decision for an agent request."""
 
     message = request.message.strip()
-    if PROMPT_INJECTION_TERMS.search(message):
+    nested_client_text = [message]
+    for event in ([request.active_event] if request.active_event else []) + request.recent_events:
+        if event is not None:
+            nested_client_text.extend(
+                [event.id, event.redacted_snippet, event.related_campaign_id or "", *event.domains]
+            )
+    for item in request.watchlist:
+        nested_client_text.extend(
+            [item.value, item.reason, item.source_title, str(item.source_url)]
+        )
+    if any(PROMPT_INJECTION_TERMS.search(value) for value in nested_client_text):
         return TopicDecision.PROMPT_INJECTION
     if EN_EXPLICIT_CREATIVE.search(message) or ZH_EXPLICIT_CREATIVE.search(message):
         return TopicDecision.OFF_TOPIC

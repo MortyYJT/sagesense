@@ -1,7 +1,6 @@
 package com.mortyyjt.sagesense.data
 
 import com.mortyyjt.sagesense.risk.RiskAnalyzer
-import java.security.MessageDigest
 import java.util.UUID
 import kotlinx.coroutines.flow.Flow
 
@@ -25,10 +24,12 @@ class RiskEventRepository(
             id = UUID.randomUUID().toString(),
             sourceType = sourceType,
             occurredAt = System.currentTimeMillis(),
-            displaySender = sender?.take(120),
-            senderHash = sender?.let(::sha256),
-            redactedSnippet = analysis.redactedText,
-            urls = analysis.urls,
+            displaySender = EventPersistencePrivacy.sanitiseDisplaySender(sender),
+            // A stable sender identifier is unnecessary for the current local
+            // memory policy and would make cross-event tracking possible.
+            senderHash = null,
+            redactedSnippet = EventPersistencePrivacy.sanitiseSnippetForStorage(analysis.redactedText),
+            urls = EventPersistencePrivacy.sanitiseUrlsForStorage(analysis.urls),
             domains = analysis.domains,
             signalCodes = analysis.signals,
             riskScore = analysis.score,
@@ -81,10 +82,6 @@ class RiskEventRepository(
         )
         watchlistDao.upsertAll(watchlist)
     }
-
-    private fun sha256(value: String): String = MessageDigest.getInstance("SHA-256")
-        .digest(value.toByteArray())
-        .joinToString("") { "%02x".format(it) }
 
     private companion object {
         // Keep relationship lookup bounded while covering the recent history shown to users.

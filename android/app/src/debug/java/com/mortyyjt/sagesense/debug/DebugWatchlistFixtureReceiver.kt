@@ -30,7 +30,7 @@ class DebugWatchlistFixtureReceiver : BroadcastReceiver() {
                             Log.w(TAG, "Rejected invalid temporary caller fixture")
                         } else {
                             app.container.database.watchlistDao().upsertAll(listOf(fixture))
-                            Log.i(TAG, "Added temporary caller fixture ${fixture.value}")
+                            Log.i(TAG, "Added temporary caller fixture")
                         }
                     }
                     ACTION_REMOVE -> {
