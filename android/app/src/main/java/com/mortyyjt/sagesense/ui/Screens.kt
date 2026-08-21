@@ -96,6 +96,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -244,6 +245,14 @@ fun SageSenseApp(
     if (!state.ready) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
+    }
+    LaunchedEffect(state.ready, state.onboardingComplete, state.permissionSetupPromptSeen) {
+        if (shouldShowPermissionSetupPrompt(state.ready, state.onboardingComplete, state.permissionSetupPromptSeen)) {
+            showPermissionSetup = true
+            // Mark before the dialog is interacted with so dismiss, deny, back, or
+            // process recreation cannot repeatedly interrupt the user.
+            viewModel.markPermissionSetupPromptSeen()
+        }
     }
     if (!state.onboardingComplete) {
         Box(Modifier.fillMaxSize()) {
@@ -508,46 +517,64 @@ private fun MainScaffold(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute in destinations.map { it.route }
+    val largeFontNavigation = LocalDensity.current.fontScale >= 1.3f
+    val navigateTo: (BottomDestination) -> Unit = { destination ->
+        navController.navigate(destination.route) {
+            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    val navigationItem: @Composable androidx.compose.foundation.layout.RowScope.(BottomDestination) -> Unit = { destination ->
+        NavigationBarItem(
+            selected = currentRoute == destination.route,
+            alwaysShowLabel = true,
+            onClick = { navigateTo(destination) },
+            icon = destination.icon,
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                indicatorColor = MaterialTheme.colorScheme.surface,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+            label = {
+                Text(
+                    when (destination.route) {
+                        "home" -> l(state.locale, "Home", "首页")
+                        "history" -> l(state.locale, "History", "记录")
+                        "learn" -> l(state.locale, "Learn", "学习")
+                        else -> l(state.locale, "Settings", "设置")
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                )
+            },
+        )
+    }
     Box(Modifier.fillMaxSize()) {
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             bottomBar = {
                 if (showBottomBar) {
-                    NavigationBar(
-                        modifier = Modifier.navigationBarsPadding(),
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    ) {
-                        destinations.forEach { destination ->
-                            NavigationBarItem(
-                                selected = currentRoute == destination.route,
-                                alwaysShowLabel = true,
-                                onClick = {
-                                    navController.navigate(destination.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                },
-                                icon = destination.icon,
-                                colors = NavigationBarItemDefaults.colors(
-                                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                                    selectedTextColor = MaterialTheme.colorScheme.primary,
-                                    indicatorColor = MaterialTheme.colorScheme.surface,
-                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                ),
-                                label = {
-                                    Text(
-                                        when (destination.route) {
-                                            "home" -> l(state.locale, "Home", "首页")
-                                            "history" -> l(state.locale, "History", "记录")
-                                            "learn" -> l(state.locale, "Learn", "学习")
-                                            else -> l(state.locale, "Settings", "设置")
-                                        },
-                                        style = MaterialTheme.typography.labelMedium,
-                                    )
-                                },
-                            )
+                    if (largeFontNavigation) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(MaterialTheme.colorScheme.primaryContainer)
+                                .navigationBarsPadding(),
+                        ) {
+                            destinations.chunked(2).forEach { rowDestinations ->
+                                Row(Modifier.fillMaxWidth()) {
+                                    rowDestinations.forEach { destination -> navigationItem(destination) }
+                                }
+                            }
+                        }
+                    } else {
+                        NavigationBar(
+                            modifier = Modifier.navigationBarsPadding(),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        ) {
+                            destinations.forEach { destination -> navigationItem(destination) }
                         }
                     }
                 }
@@ -800,14 +827,14 @@ private fun HomeScreen(
         item {
             Text(l(locale, "Automatic protection", "自动防护"), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(10.dp))
-            StatusRow(Icons.Default.Notifications, l(locale, "Message notifications", "消息通知"), permissions.notificationAccess) {
+            StatusRow(Icons.Default.Notifications, l(locale, "Message notifications", "消息通知"), permissions.notificationAccess, locale) {
                 onNotificationAccess()
             }
-            StatusRow(Icons.Default.Call, l(locale, "Incoming call warnings", "来电风险警告"), permissions.callScreening) {
+            StatusRow(Icons.Default.Call, l(locale, "Incoming call warnings", "来电风险警告"), permissions.callScreening, locale) {
                 if (permissions.callScreeningAvailable) onCallRole()
             }
             if (!permissions.notificationPosting) {
-                StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), false) {
+                StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), false, locale) {
                     onNotificationPermission()
                 }
             }
@@ -831,7 +858,7 @@ private fun HomeScreen(
         item {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(l(locale, "Recent checks", "最近检测"), style = MaterialTheme.typography.titleLarge)
-                Text("${state.events.size}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("${state.events.size}", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 22.sp)
             }
         }
         if (state.events.isEmpty()) {
@@ -843,7 +870,13 @@ private fun HomeScreen(
 }
 
 @Composable
-private fun StatusRow(icon: androidx.compose.ui.graphics.vector.ImageVector, title: String, enabled: Boolean, onClick: () -> Unit) {
+private fun StatusRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    enabled: Boolean,
+    locale: String,
+    onClick: () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -858,7 +891,7 @@ private fun StatusRow(icon: androidx.compose.ui.graphics.vector.ImageVector, tit
             )
             Text(title, modifier = Modifier.weight(1f).padding(horizontal = 12.dp), style = MaterialTheme.typography.bodyLarge)
             Text(
-                if (enabled) "ON" else "OFF",
+                if (enabled) l(locale, "Enabled", "已开启") else l(locale, "Not enabled", "未开启"),
                 color = if (enabled) MaterialTheme.sageStatusColors.success else MaterialTheme.sageStatusColors.warning,
                 fontWeight = FontWeight.Bold,
             )
@@ -959,7 +992,7 @@ private fun EventCard(event: RiskEventEntity, locale: String, onClick: () -> Uni
             }
             Text(event.displaySender ?: l(locale, "Unknown sender", "未知发送方"), style = MaterialTheme.typography.titleMedium)
             Text(event.redactedSnippet, maxLines = 2, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
-            Text("${event.riskScore}/100", color = colour, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text("${event.riskScore}/100", color = colour, fontWeight = FontWeight.Bold, fontSize = 22.sp)
             if (event.seededDemoData) DemoBadge(locale)
         }
     }
@@ -975,13 +1008,13 @@ private fun EventDetailScreen(
 ) {
     if (event == null) {
         Column(Modifier.fillMaxSize().padding(20.dp)) {
-            BackHeader(l(locale, "Risk detail", "风险详情"), onBack)
+            BackHeader(l(locale, "Risk detail", "风险详情"), locale, onBack)
             EmptyCard(l(locale, "This event is no longer stored.", "这条记录已不存在。"))
         }
         return
     }
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { BackHeader(l(locale, "Risk detail", "风险详情"), onBack) }
+        item { BackHeader(l(locale, "Risk detail", "风险详情"), locale, onBack) }
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = riskColour(event.riskLevel)),
@@ -1072,7 +1105,7 @@ private fun AgentScreen(
     }
     val uriHandler = LocalUriHandler.current
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        item { BackHeader(l(locale, "Ask SageSense", "询问 SageSense"), onBack) }
+        item { BackHeader(l(locale, "Ask SageSense", "询问 SageSense"), locale, onBack) }
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
@@ -1341,10 +1374,10 @@ private fun SettingsScreen(
         }
         item {
             Text(l(locale, "Protection access", "防护授权"), style = MaterialTheme.typography.titleLarge)
-            StatusRow(Icons.Default.Notifications, l(locale, "Notification access", "通知读取权限"), permissions.notificationAccess, onNotificationAccess)
-            StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), permissions.notificationPosting, onNotificationPermission)
+            StatusRow(Icons.Default.Notifications, l(locale, "Notification access", "通知读取权限"), permissions.notificationAccess, locale, onNotificationAccess)
+            StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), permissions.notificationPosting, locale, onNotificationPermission)
             if (permissions.callScreeningAvailable) {
-                StatusRow(Icons.Default.Call, l(locale, "Call screening role", "来电筛查角色"), permissions.callScreening, onCallRole)
+                StatusRow(Icons.Default.Call, l(locale, "Call screening role", "来电筛查角色"), permissions.callScreening, locale, onCallRole)
             }
         }
         item {
@@ -1377,7 +1410,10 @@ private fun SettingsScreen(
             Card(elevation = sageCardElevation()) {
                 Column(Modifier.padding(18.dp)) {
                     Text(l(locale, "Agent service", "Agent 服务"), style = MaterialTheme.typography.titleMedium)
-                    Text("DeepSeek V4 Flash · server-side key · 10 s timeout", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        l(locale, "DeepSeek V4 Flash · server-side key · 15 s timeout", "DeepSeek V4 Flash · 服务端密钥 · 超时 15 秒"),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }
@@ -1398,10 +1434,10 @@ private fun SettingsScreen(
 }
 
 @Composable
-private fun BackHeader(title: String, onBack: () -> Unit) {
+private fun BackHeader(title: String, locale: String, onBack: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = onBack, modifier = Modifier.size(56.dp)) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back", modifier = Modifier.size(30.dp))
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, l(locale, "Back", "返回"), modifier = Modifier.size(30.dp))
         }
         Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(start = 6.dp))
     }
@@ -1428,7 +1464,7 @@ private fun EmptyCard(text: String) {
 @Composable
 private fun RiskBadge(level: RiskLevel, locale: String) {
     Box(Modifier.clip(RoundedCornerShape(30.dp)).background(riskColour(level)).padding(horizontal = 13.dp, vertical = 7.dp)) {
-        Text(riskLabel(level, locale), color = riskOnColour(level), fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        Text(riskLabel(level, locale), color = riskOnColour(level), fontWeight = FontWeight.Bold, fontSize = 22.sp)
     }
 }
 
@@ -1445,7 +1481,7 @@ private fun DemoBadge(locale: String) {
 internal fun EyeShieldMascot(size: androidx.compose.ui.unit.Dp) {
     Image(
         painter = painterResource(R.drawable.sagesense_anti_scam_mascot),
-        contentDescription = "SageSense anti-scam shield companion",
+        contentDescription = null,
         modifier = Modifier.size(size),
         contentScale = ContentScale.Fit,
     )

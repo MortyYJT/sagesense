@@ -5,6 +5,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
@@ -126,7 +127,7 @@ private val LocalSageStatusColors = staticCompositionLocalOf { LightStatusColors
 val MaterialTheme.sageStatusColors: SageStatusColors
     @Composable get() = LocalSageStatusColors.current
 
-private val SageTypography = Typography(
+internal val SageTypography = Typography(
     displayLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 48.sp, lineHeight = 56.sp, fontWeight = FontWeight.Bold),
     displayMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 40.sp, lineHeight = 48.sp, fontWeight = FontWeight.Bold),
     displaySmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold),
@@ -134,14 +135,14 @@ private val SageTypography = Typography(
     headlineMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold),
     headlineSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold),
     titleLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 23.sp, lineHeight = 29.sp, fontWeight = FontWeight.Bold),
-    titleMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
-    titleSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold),
-    bodyLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 19.sp, lineHeight = 27.sp),
-    bodyMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 17.sp, lineHeight = 24.sp),
-    bodySmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 15.sp, lineHeight = 22.sp),
-    labelLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold),
-    labelMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold),
-    labelSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold),
+    titleMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold),
+    titleSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold),
+    bodyLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 31.sp),
+    bodyMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 31.sp),
+    bodySmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 31.sp),
+    labelLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
+    labelMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
+    labelSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.SemiBold),
 )
 
 private val SageShapes = Shapes(
@@ -172,6 +173,7 @@ fun SageSenseTheme(
     }
     CompositionLocalProvider(
         LocalSageStatusColors provides if (darkTheme) DarkStatusColors else LightStatusColors,
+        LocalMinimumInteractiveComponentSize provides 56.dp,
     ) {
         MaterialTheme(
             colorScheme = if (darkTheme) SageDarkColors else SageLightColors,

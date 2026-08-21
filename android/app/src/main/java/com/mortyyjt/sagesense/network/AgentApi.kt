@@ -84,9 +84,9 @@ class AgentClient {
     private val json = Json { ignoreUnknownKeys = true }
     private val okHttp = OkHttpClient.Builder()
         .connectTimeout(8, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(8, TimeUnit.SECONDS)
-        .callTimeout(35, TimeUnit.SECONDS)
+        .callTimeout(15, TimeUnit.SECONDS)
         .build()
     private val api = Retrofit.Builder()
         .baseUrl(BuildConfig.SAGESENSE_API_BASE_URL)
