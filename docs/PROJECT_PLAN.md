@@ -26,7 +26,10 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - An Android emulator is connected as `emulator-5554`. No physical phone has been verified yet.
 - Yijia Sheng's `ba2eae5` adds a unified permission setup dialog on `main`. Unit tests, lint and APK assembly pass, but repeat-prompt behaviour, first-launch persistence and accessibility still need acceptance testing.
 - Curated bilingual knowledge cards, PRD, design-divergence record, source register, test report, video script and submission checklist exist.
-- Backend tests pass: 10. Android JVM tests, lint and debug APK build passed on the previous baseline.
+- Deterministic anti-scam topic gating, bounded request schemas, and prompt-extraction rejection run before any provider call.
+- The prototype has a process-local best-effort limiter of 8 requests/minute and 2 concurrent requests per client; durable multi-instance enforcement remains a Vercel WAF responsibility.
+- Curated knowledge retrieval now uses weighted bilingual lexical matching with stable ordering; no-match queries return no citations. No vector database is intentionally in scope for this small curated corpus.
+- Backend tests pass: 22 on the current local tree. Current Android verification passes with 9 tests and 0 failures, lint 0 errors (7 dependency-version warnings only), and a successful debug APK build.
 
 ### Still required
 
@@ -34,6 +37,7 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - Connect a physical Android phone and complete notification, call role, offline, TalkBack, large-text and delete-history checks.
 - Build the APK with `https://sagesense.vercel.app/` and verify the Android-to-Agent path on-device.
 - Review and polish the Compose UI against Jiahui's final design decisions.
+- Keep the backend scope constrained to curated local knowledge: it has no arbitrary live web browsing and no vector database by design. A future production deployment still needs WAF-level multi-instance rate enforcement.
 - Capture real-device clips, complete the video, prepare Devpost, build the clean ZIP and test every public link while logged out.
 
 ## Schedule

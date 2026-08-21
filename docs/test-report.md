@@ -6,14 +6,14 @@ Last automated run: 2026-08-21 (Australia/Melbourne)
 
 | Check | Command | Result |
 |---|---|---|
-| Backend | `.venv/bin/pytest -q backend/tests` | Pass: 10 tests |
+| Backend | `.venv/bin/pytest -q backend/tests` | Pass: 22 tests (2026-08-21 local run) |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
 | OpenCode Go catalog | Authenticated `GET /zen/go/v1/models` | Pass: `deepseek-v4-flash` available; secret not printed |
 | Production Agent | `POST https://sagesense.vercel.app/v1/agent/query` with seeded redacted event | Pass: HTTP 200, `degraded=false`, high risk, actions and 4 allowlisted citations |
 | Knowledge and weight JSON | `python -m json.tool ...` | Pass |
-| Android JVM tests | `JAVA_HOME=../.jdk17 ./gradlew testDebugUnitTest` | Pass: 6 test methods, including 10 scam and 10 benign fixtures, after permission commit `ba2eae5` |
-| Android lint | `JAVA_HOME=../.jdk17 ./gradlew lintDebug` | Pass: 0 errors, 7 dependency-version warnings, after `ba2eae5` |
-| Android APK | `JAVA_HOME=../.jdk17 ./gradlew assembleDebug` | Pass: 20,831,657-byte debug APK, after `ba2eae5` |
+| Android JVM tests | `JAVA_HOME=../.jdk17 ./gradlew testDebugUnitTest` | Pass: 9 tests, 0 failures, including HTTP 429/`Retry-After` mapping, after current-tree re-run |
+| Android lint | `JAVA_HOME=../.jdk17 ./gradlew lintDebug` | Pass: 0 errors, 7 dependency-version warnings only |
+| Android APK | `JAVA_HOME=../.jdk17 ./gradlew assembleDebug` | BUILD SUCCESSFUL after current-tree re-run |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
@@ -25,6 +25,9 @@ ADB 37.0.1 reports `emulator-5554` as an authorised emulator. No physical Androi
 
 - Backend health response and secret-safe configuration status.
 - Backend request bounds and deterministic offline response.
+- Deterministic topic gate rejects off-topic and prompt-extraction requests before a provider call.
+- Process-local rate limiting returns `429` with `Retry-After`, and bounds/evicts client buckets.
+- Weighted bilingual lexical knowledge search is stable, applies limits, and returns no citations on no-match.
 - Agent JSON recovery and allowlisted citation hydration.
 - Personal Scam Memory campaign comparison and Watchlist normalisation.
 - Kotlin risk engine: 10 scam and 10 benign English/Chinese fixtures.

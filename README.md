@@ -28,6 +28,15 @@ CallScreeningService ────────┘          │                   
 
 Risk verdicts are generated locally and remain available offline. The cloud Agent explains evidence; it does not control the phone.
 
+Before any provider call, the backend applies a deterministic anti-scam topic
+gate and rejects off-topic or prompt-extraction requests. Pydantic bounds cap
+the message and nested event payloads; a process-local best-effort limiter
+allows 8 requests per minute and 2 concurrent requests per client. This is not
+a durable multi-instance boundary: production still needs Vercel WAF
+enforcement. The knowledge layer uses a small weighted bilingual lexical
+retriever over curated cards, intentionally without a vector database. A
+no-match query produces no citations rather than unrelated sources.
+
 ## Repository
 
 - `android/` — Kotlin, Jetpack Compose, Room, DataStore, notification and call-screening services.
@@ -81,6 +90,12 @@ The seeded phone number `+61 400 000 999` and `.example` domain are presentation
 - OTP, card, and account-number patterns are redacted before persistence or Agent use.
 - At most 10 recent redacted summaries and 20 Watchlist entries are sent on an explicit Agent query.
 - The backend has no user database and does not persist request bodies.
+- Agent requests are limited to 800 characters, bounded nested collections and
+  redacted event fields; off-topic and prompt-extraction requests are stopped
+  before the model provider is called.
+- The prototype applies a best-effort process-local limit of 8 requests/minute
+  and 2 concurrent requests per client. Multi-instance production enforcement
+  requires a Vercel WAF rule.
 - Non-demo history is pruned after 30 days; users can delete it immediately.
 - Model outputs are validated, citation IDs are allowlisted, and safe actions require user confirmation.
 
