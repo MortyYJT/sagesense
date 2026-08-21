@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
@@ -14,6 +14,11 @@ class RiskLevel(str, Enum):
     UNKNOWN = "unknown"
 
 
+EventUrl = Annotated[str, Field(max_length=2048)]
+EventDomain = Annotated[str, Field(max_length=253)]
+SignalCode = Annotated[str, Field(max_length=80)]
+
+
 class RiskEventSummary(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -23,9 +28,9 @@ class RiskEventSummary(BaseModel):
     display_sender: str | None = Field(default=None, max_length=120)
     sender_hash: str | None = Field(default=None, max_length=128)
     redacted_snippet: str = Field(default="", max_length=500)
-    urls: list[str] = Field(default_factory=list, max_length=5)
-    domains: list[str] = Field(default_factory=list, max_length=5)
-    signal_codes: list[str] = Field(default_factory=list, max_length=20)
+    urls: list[EventUrl] = Field(default_factory=list, max_length=5)
+    domains: list[EventDomain] = Field(default_factory=list, max_length=5)
+    signal_codes: list[SignalCode] = Field(default_factory=list, max_length=20)
     risk_score: int = Field(ge=0, le=100)
     risk_level: RiskLevel
     related_campaign_id: str | None = Field(default=None, max_length=80)

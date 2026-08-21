@@ -9,6 +9,7 @@ from typing import Any
 from openai import AsyncOpenAI
 from pydantic import ValidationError
 
+from backend.app.guardrails import TopicDecision, classify_topic, safety_boundary_response
 from backend.app.knowledge import KnowledgeRepository
 from backend.app.schemas import AgentQueryRequest, AgentQueryResponse, ModelAnswer, RiskLevel
 from backend.app.tools import AgentTools, TOOL_SPECS, default_action_codes, safe_actions
@@ -166,6 +167,12 @@ class AgentService:
         )
 
     async def answer(self, request: AgentQueryRequest) -> AgentQueryResponse:
+        # Keep the product boundary deterministic and before any provider call.
+        # This also prevents prompt-extraction requests from spending API budget.
+        topic_decision = classify_topic(request)
+        if topic_decision != TopicDecision.ALLOW:
+            return safety_boundary_response(request, topic_decision)
+
         if self.client is None:
             return self.deterministic_response(request)
 

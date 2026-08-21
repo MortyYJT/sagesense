@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.agent import AgentService
+from backend.app.guardrails import InMemoryRateLimiter, request_client_key
 from backend.app.schemas import AgentQueryRequest, AgentQueryResponse, HealthResponse
 
 
@@ -21,6 +22,9 @@ app.add_middleware(
 )
 
 agent_service = AgentService()
+# Best-effort per-process protection for the prototype.  Durable multi-instance
+# enforcement belongs in Vercel WAF; no APK-provided install ID is trusted here.
+rate_limiter = InMemoryRateLimiter(max_requests=8, window_seconds=60.0, max_concurrent=2)
 
 
 @app.get("/", include_in_schema=False)
@@ -34,5 +38,15 @@ async def health() -> HealthResponse:
 
 
 @app.post("/v1/agent/query", response_model=AgentQueryResponse)
-async def query_agent(request: AgentQueryRequest) -> AgentQueryResponse:
-    return await agent_service.answer(request)
+async def query_agent(payload: AgentQueryRequest, request: Request) -> AgentQueryResponse:
+    reservation = rate_limiter.acquire(request_client_key(request))
+    if not reservation.allowed:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many agent requests; please retry later.",
+            headers={"Retry-After": str(reservation.retry_after)},
+        )
+    try:
+        return await agent_service.answer(payload)
+    finally:
+        rate_limiter.release(reservation)
