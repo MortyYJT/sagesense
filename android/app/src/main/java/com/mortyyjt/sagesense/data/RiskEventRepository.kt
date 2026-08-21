@@ -43,12 +43,12 @@ class RiskEventRepository(
     suspend fun find(id: String): RiskEventEntity? = eventDao.findById(id)
     suspend fun recent(limit: Int = 10): List<RiskEventEntity> = eventDao.recent(limit)
     suspend fun related(event: RiskEventEntity): List<RiskEventEntity> =
-        event.relatedCampaignId?.let { eventDao.related(it, event.id) }.orEmpty()
+        ScamMemoryPolicy.relatedCandidates(event, eventDao.recent(RELATED_EVENT_SCAN_LIMIT))
 
     suspend fun clearHistory() = eventDao.deleteAll()
 
     suspend fun prune(retentionDays: Int = 30) {
-        val cutoff = System.currentTimeMillis() - retentionDays * 24L * 60L * 60L * 1000L
+        val cutoff = RetentionPolicy.cutoffMillis(System.currentTimeMillis(), retentionDays)
         eventDao.deleteOlderThan(cutoff)
     }
 
@@ -85,4 +85,9 @@ class RiskEventRepository(
     private fun sha256(value: String): String = MessageDigest.getInstance("SHA-256")
         .digest(value.toByteArray())
         .joinToString("") { "%02x".format(it) }
+
+    private companion object {
+        // Keep relationship lookup bounded while covering the recent history shown to users.
+        const val RELATED_EVENT_SCAN_LIMIT = 100
+    }
 }

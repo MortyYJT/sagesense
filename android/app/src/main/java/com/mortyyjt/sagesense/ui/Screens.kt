@@ -7,7 +7,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -33,16 +32,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DarkMode
@@ -51,7 +52,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -74,11 +74,11 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -97,9 +97,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -108,8 +108,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -119,13 +121,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.mortyyjt.sagesense.BuildConfig
 import com.mortyyjt.sagesense.R
 import com.mortyyjt.sagesense.data.LearnCard
 import com.mortyyjt.sagesense.data.RiskEventEntity
+import com.mortyyjt.sagesense.data.ScamMemoryPolicy
 import com.mortyyjt.sagesense.data.WatchlistEntity
 import com.mortyyjt.sagesense.risk.RiskLevel
 import com.mortyyjt.sagesense.service.AlertNotifier
+import com.mortyyjt.sagesense.service.DemoLaunchAction
+import com.mortyyjt.sagesense.service.RiskOverlayController
 import com.mortyyjt.sagesense.service.SageNotificationListenerService
+import com.mortyyjt.sagesense.service.demoLaunchAction
 import com.mortyyjt.sagesense.ui.theme.ThemeMode
 import com.mortyyjt.sagesense.ui.theme.sageStatusColors
 import java.text.DateFormat
@@ -134,6 +141,7 @@ import java.util.Date
 private data class PermissionState(
     val notificationAccess: Boolean,
     val notificationPosting: Boolean,
+    val systemOverlay: Boolean,
     val callScreening: Boolean,
     val callScreeningAvailable: Boolean,
 )
@@ -149,18 +157,28 @@ private fun sageCardElevation() = CardDefaults.cardElevation(defaultElevation = 
 fun SageSenseApp(
     viewModel: SageSenseViewModel,
     initialEventId: String?,
+    initialCognitivePauseEventId: String?,
     onDeepLinkConsumed: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val agentState by viewModel.agentState.collectAsStateWithLifecycle()
+    val manualCheckState by viewModel.manualCheckState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var permissionState by remember { mutableStateOf(context.readPermissionState()) }
     var showPermissionSetup by rememberSaveable { mutableStateOf(false) }
     var callRoleNeedsSettings by rememberSaveable { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, context) {
+    DisposableEffect(lifecycleOwner, context, state.locale) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) permissionState = context.readPermissionState()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val previous = permissionState
+                val updated = context.readPermissionState()
+                permissionState = updated
+                RiskOverlayController.hide()
+                if (!previous.systemOverlay && updated.systemOverlay) {
+                    RiskOverlayController.showPreview(context, state.locale)
+                }
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -211,17 +229,30 @@ fun SageSenseApp(
         if (Build.VERSION.SDK_INT >= 33) postNotificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
     val openNotificationSettings = {
-        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-            }
-        } else {
-            Intent(
-                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                Uri.parse("package:${context.packageName}"),
-            )
+        val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         }
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    }
+    val openOverlaySettings = {
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            "package:${context.packageName}".toUri(),
+        )
+        try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (_: Exception) {
+            context.startActivity(
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }
+    }
+    val reviewOverlayPermission = {
+        if (permissionState.systemOverlay) {
+            RiskOverlayController.showPreview(context, state.locale)
+        } else {
+            openOverlaySettings()
+        }
     }
     val requestCallRole = {
         if (Build.VERSION.SDK_INT >= 29) {
@@ -246,6 +277,11 @@ fun SageSenseApp(
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
+    LaunchedEffect(state.locale) {
+        // Channel behaviour stays immutable, while Android permits refreshing
+        // user-facing channel labels and descriptions for the selected language.
+        AlertNotifier.createChannels(context, state.locale)
+    }
     LaunchedEffect(state.ready, state.onboardingComplete, state.permissionSetupPromptSeen) {
         if (shouldShowPermissionSetupPrompt(state.ready, state.onboardingComplete, state.permissionSetupPromptSeen)) {
             showPermissionSetup = true
@@ -262,6 +298,7 @@ fun SageSenseApp(
                 onLanguage = viewModel::setLanguage,
                 onNotificationAccess = { showPermissionSetup = true },
                 onNotificationPermission = { showPermissionSetup = true },
+                onSystemOverlay = { showPermissionSetup = true },
                 onCallRole = { showPermissionSetup = true },
                 onContinue = viewModel::completeOnboarding,
             )
@@ -272,6 +309,8 @@ fun SageSenseApp(
                     callRoleNeedsSettings = callRoleNeedsSettings,
                     onNotificationAccess = openNotificationAccess,
                     onNotificationPermission = reviewNotificationPermission,
+                    onSystemOverlay = reviewOverlayPermission,
+                    onOpenSystemOverlaySettings = openOverlaySettings,
                     onCallRole = reviewCallRole,
                     onDismiss = { showPermissionSetup = false },
                 )
@@ -296,6 +335,17 @@ fun SageSenseApp(
         }
     }
     val cognitivePauseEvent = state.events.firstOrNull { it.id == cognitivePauseEventId }
+    LaunchedEffect(cognitivePauseEvent?.id) {
+        if (cognitivePauseEvent != null) RiskOverlayController.hide()
+    }
+
+    LaunchedEffect(initialCognitivePauseEventId, state.events) {
+        val eventId = initialCognitivePauseEventId ?: return@LaunchedEffect
+        if (state.events.any { it.id == eventId }) {
+            cognitivePauseEventId = eventId
+            onDeepLinkConsumed()
+        }
+    }
 
     val navController = rememberNavController()
     LaunchedEffect(initialEventId, state.events) {
@@ -310,17 +360,24 @@ fun SageSenseApp(
         navController = navController,
         state = state,
         agentState = agentState,
+        manualCheckState = manualCheckState,
         permissions = permissionState,
         cognitivePauseEvent = cognitivePauseEvent,
         onNotificationAccess = { showPermissionSetup = true },
         onNotificationPermission = { showPermissionSetup = true },
+        onSystemOverlay = { showPermissionSetup = true },
         onCallRole = { showPermissionSetup = true },
         onLanguage = viewModel::setLanguage,
         onThemeMode = viewModel::setThemeMode,
         onClearHistory = viewModel::clearHistory,
         onAskAgent = viewModel::askAgent,
         onResetAgent = viewModel::resetAgent,
-        onDismissCognitivePause = { cognitivePauseEventId = null },
+        onManualCheck = viewModel::checkManually,
+        onResetManualCheck = viewModel::resetManualCheck,
+        onDismissCognitivePause = {
+            cognitivePauseEventId = null
+            RiskOverlayController.hide()
+        },
     )
     if (showPermissionSetup) {
         PermissionSetupDialog(
@@ -329,6 +386,8 @@ fun SageSenseApp(
             callRoleNeedsSettings = callRoleNeedsSettings,
             onNotificationAccess = openNotificationAccess,
             onNotificationPermission = reviewNotificationPermission,
+            onSystemOverlay = reviewOverlayPermission,
+            onOpenSystemOverlaySettings = openOverlaySettings,
             onCallRole = reviewCallRole,
             onDismiss = { showPermissionSetup = false },
         )
@@ -343,12 +402,15 @@ private fun Context.readPermissionState(): PermissionState {
     } else {
         NotificationManagerCompat.getEnabledListenerPackages(this).contains(packageName)
     }
-    val notificationPosting = Build.VERSION.SDK_INT < 33 ||
+    val runtimeNotificationPermission = Build.VERSION.SDK_INT < 33 ||
         ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    val notificationPosting = runtimeNotificationPermission &&
+        NotificationManagerCompat.from(this).areNotificationsEnabled()
+    val systemOverlay = Settings.canDrawOverlays(this)
     val roleManager = if (Build.VERSION.SDK_INT >= 29) getSystemService(RoleManager::class.java) else null
     val available = Build.VERSION.SDK_INT >= 29 && roleManager?.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) == true
-    val held = available && roleManager?.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) == true
-    return PermissionState(notificationAccess, notificationPosting, held, available)
+    val held = roleManager?.let { available && it.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) } == true
+    return PermissionState(notificationAccess, notificationPosting, systemOverlay, held, available)
 }
 
 @Composable
@@ -358,9 +420,13 @@ private fun PermissionSetupDialog(
     callRoleNeedsSettings: Boolean,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
+    onOpenSystemOverlaySettings: () -> Unit,
     onCallRole: () -> Unit,
     onDismiss: () -> Unit,
 ) {
+    // The floating warning is an optional enhancement and is deliberately not
+    // counted as required core protection.
     val total = if (permissions.callScreeningAvailable) 3 else 2
     val enabled = listOf(
         permissions.notificationAccess,
@@ -409,6 +475,32 @@ private fun PermissionSetupDialog(
                     },
                     onClick = onNotificationPermission,
                 )
+                PermissionDialogRow(
+                    title = l(locale, "Optional floating warning", "可选悬浮风险警告"),
+                    description = l(
+                        locale,
+                        "Shows one short-lived warning over other apps. SageSense never reads or captures the screen.",
+                        "在其他应用上方短暂显示一个警告。SageSense 不会读取或截取屏幕内容。",
+                    ),
+                    granted = permissions.systemOverlay,
+                    locale = locale,
+                    actionLabel = if (permissions.systemOverlay) {
+                        l(locale, "Preview warning", "预览警告")
+                    } else {
+                        l(locale, "Open Android setting", "打开系统设置")
+                    },
+                    onClick = onSystemOverlay,
+                )
+                if (permissions.systemOverlay) {
+                    TextButton(
+                        onClick = onOpenSystemOverlaySettings,
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+                    ) {
+                        Text(l(locale, "Review or turn off overlay access", "查看或关闭悬浮窗授权"))
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null)
+                    }
+                }
                 if (permissions.callScreeningAvailable) {
                     PermissionDialogRow(
                         title = l(locale, "Warn about incoming calls", "来电风险警告"),
@@ -496,16 +588,20 @@ private fun MainScaffold(
     navController: NavHostController,
     state: SageSenseUiState,
     agentState: AgentUiState,
+    manualCheckState: ManualCheckUiState,
     permissions: PermissionState,
     cognitivePauseEvent: RiskEventEntity?,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onLanguage: (String) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
     onClearHistory: () -> Unit,
     onAskAgent: (String, String?) -> Unit,
     onResetAgent: () -> Unit,
+    onManualCheck: (String, String) -> Unit,
+    onResetManualCheck: () -> Unit,
     onDismissCognitivePause: () -> Unit,
 ) {
     val destinations = listOf(
@@ -591,9 +687,28 @@ private fun MainScaffold(
                     permissions = permissions,
                     onNotificationAccess = onNotificationAccess,
                     onNotificationPermission = onNotificationPermission,
+                    onSystemOverlay = onSystemOverlay,
                     onCallRole = onCallRole,
                     onOpenEvent = { navController.navigate("detail/$it") },
                     onAgent = { navController.navigate("agent") },
+                    onManualCheck = { navController.navigate("manual-check") },
+                )
+            }
+            composable("manual-check") {
+                ManualCheckScreen(
+                    locale = state.locale,
+                    state = manualCheckState,
+                    onBack = {
+                        onResetManualCheck()
+                        navController.popBackStack()
+                    },
+                    onCheck = onManualCheck,
+                    onResult = { eventId ->
+                        onResetManualCheck()
+                        navController.navigate("detail/$eventId") {
+                            popUpTo("manual-check") { inclusive = true }
+                        }
+                    },
                 )
             }
             composable("history") {
@@ -610,6 +725,7 @@ private fun MainScaffold(
                     onThemeMode = onThemeMode,
                     onNotificationAccess = onNotificationAccess,
                     onNotificationPermission = onNotificationPermission,
+                    onSystemOverlay = onSystemOverlay,
                     onCallRole = onCallRole,
                     onClearHistory = onClearHistory,
                     onFaq = { navController.navigate("faq-safety") },
@@ -627,13 +743,11 @@ private fun MainScaffold(
                 arguments = listOf(navArgument("eventId") { type = NavType.StringType }),
             ) { entry ->
                 val eventId = entry.arguments?.getString("eventId")
+                val activeEvent = state.events.firstOrNull { it.id == eventId }
                 EventDetailScreen(
                     locale = state.locale,
-                    event = state.events.firstOrNull { it.id == eventId },
-                    related = state.events.filter { candidate ->
-                        candidate.id != eventId && candidate.relatedCampaignId != null &&
-                            candidate.relatedCampaignId == state.events.firstOrNull { it.id == eventId }?.relatedCampaignId
-                    },
+                    event = activeEvent,
+                    related = activeEvent?.let { ScamMemoryPolicy.relatedCandidates(it, state.events) }.orEmpty(),
                     onBack = navController::popBackStack,
                     onAsk = { navController.navigate("agent?eventId=$eventId") },
                 )
@@ -673,6 +787,7 @@ private fun OnboardingScreen(
     onLanguage: (String) -> Unit,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onContinue: () -> Unit,
 ) {
@@ -724,6 +839,19 @@ private fun OnboardingScreen(
                     locale = locale,
                 )
             }
+        }
+        item {
+            PermissionCard(
+                title = l(locale, "Optional floating warning", "可选悬浮风险警告"),
+                description = l(
+                    locale,
+                    "Shows a short-lived warning over other apps and never reads the screen.",
+                    "在其他应用上方短暂显示警告，不会读取屏幕内容。",
+                ),
+                granted = permissions.systemOverlay,
+                onClick = onSystemOverlay,
+                locale = locale,
+            )
         }
         if (permissions.callScreeningAvailable) {
             item {
@@ -787,9 +915,11 @@ private fun HomeScreen(
     permissions: PermissionState,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onOpenEvent: (String) -> Unit,
     onAgent: () -> Unit,
+    onManualCheck: () -> Unit,
 ) {
     val locale = state.locale
     val context = LocalContext.current
@@ -817,9 +947,17 @@ private fun HomeScreen(
                     )
                     Spacer(Modifier.height(10.dp))
                     Button(onClick = onAgent, modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp)) {
-                        Icon(Icons.Default.Chat, null)
+                        Icon(Icons.AutoMirrored.Filled.Chat, null)
                         Spacer(Modifier.width(8.dp))
                         Text(l(locale, "Ask SageSense", "询问 SageSense"))
+                    }
+                    OutlinedButton(
+                        onClick = onManualCheck,
+                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp).heightIn(min = 58.dp),
+                    ) {
+                        Icon(Icons.Default.Search, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(l(locale, "Check a message or number", "检测消息或号码"))
                     }
                 }
             }
@@ -829,6 +967,9 @@ private fun HomeScreen(
             Spacer(Modifier.height(10.dp))
             StatusRow(Icons.Default.Notifications, l(locale, "Message notifications", "消息通知"), permissions.notificationAccess, locale) {
                 onNotificationAccess()
+            }
+            StatusRow(Icons.Default.Shield, l(locale, "Optional floating warning", "可选悬浮风险警告"), permissions.systemOverlay, locale) {
+                onSystemOverlay()
             }
             StatusRow(Icons.Default.Call, l(locale, "Incoming call warnings", "来电风险警告"), permissions.callScreening, locale) {
                 if (permissions.callScreeningAvailable) onCallRole()
@@ -841,7 +982,13 @@ private fun HomeScreen(
         }
         item {
             OutlinedButton(
-                onClick = { AlertNotifier.postDemoScam(context) },
+                onClick = {
+                    when (demoLaunchAction(permissions.notificationAccess, permissions.notificationPosting)) {
+                        DemoLaunchAction.POST_DEMO -> AlertNotifier.postDemoScam(context, locale)
+                        DemoLaunchAction.REQUEST_NOTIFICATION_ACCESS -> onNotificationAccess()
+                        DemoLaunchAction.REQUEST_POSTING_PERMISSION -> onNotificationPermission()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 58.dp),
             ) {
                 Icon(Icons.Default.AutoAwesome, null)
@@ -849,7 +996,11 @@ private fun HomeScreen(
                 Text(l(locale, "Send seeded demo scam", "发送演示诈骗通知"))
             }
             Text(
-                l(locale, "Clearly labelled test data — not a real intercepted message.", "这是明确标注的测试数据，不是真实拦截记录。"),
+                l(
+                    locale,
+                    "Clearly labelled test data. Send twice to demonstrate Personal Scam Memory across a changed sender and domain.",
+                    "这是明确标注的测试数据。发送两次可演示更换发送方和域名后的个人诈骗记忆。",
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline,
                 modifier = Modifier.padding(top = 6.dp),
@@ -899,6 +1050,100 @@ private fun StatusRow(
     }
 }
 
+@Composable
+private fun ManualCheckScreen(
+    locale: String,
+    state: ManualCheckUiState,
+    onBack: () -> Unit,
+    onCheck: (String, String) -> Unit,
+    onResult: (String) -> Unit,
+) {
+    var sender by rememberSaveable { mutableStateOf("") }
+    var content by rememberSaveable { mutableStateOf("") }
+    LaunchedEffect(state) {
+        if (state is ManualCheckUiState.Success) onResult(state.eventId)
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item { BackHeader(l(locale, "Check locally", "本机安全检测"), locale, onBack) }
+        item {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = sageCardElevation(),
+            ) {
+                Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.Shield, null, tint = MaterialTheme.colorScheme.primary)
+                        Text(
+                            l(locale, "Private and permission-free", "私密且无需系统权限"),
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(start = 10.dp),
+                        )
+                    }
+                    Text(
+                        l(
+                            locale,
+                            "Paste a suspicious message, link or phone number. The first check runs entirely on this phone and is saved only in local history.",
+                            "粘贴可疑消息、链接或电话号码。首次检测完全在本机完成，只保存到本地记录。",
+                        ),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+        }
+        item {
+            OutlinedTextField(
+                value = sender,
+                onValueChange = { sender = it.take(120) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(l(locale, "Sender or phone number (optional)", "发送方或电话号码（可选）")) },
+                minLines = 1,
+                maxLines = 2,
+            )
+        }
+        item {
+            OutlinedTextField(
+                value = content,
+                onValueChange = { content = it.take(2_000) },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(l(locale, "Message or link", "消息或链接")) },
+                minLines = 5,
+            )
+        }
+        item {
+            Button(
+                onClick = { onCheck(sender, content) },
+                enabled = (sender.isNotBlank() || content.isNotBlank()) && state !is ManualCheckUiState.Checking,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp),
+            ) {
+                if (state is ManualCheckUiState.Checking) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(26.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 3.dp,
+                    )
+                    Spacer(Modifier.width(10.dp))
+                }
+                Text(l(locale, "Analyse on this phone", "在本机分析"))
+            }
+        }
+        if (state is ManualCheckUiState.Error) {
+            item {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    elevation = sageCardElevation(),
+                ) {
+                    Text(state.message, modifier = Modifier.padding(20.dp), style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HistoryScreen(state: SageSenseUiState, onOpenEvent: (String) -> Unit) {
@@ -908,7 +1153,7 @@ private fun HistoryScreen(state: SageSenseUiState, onOpenEvent: (String) -> Unit
     val locale = state.locale
     Column(Modifier.fillMaxSize()) {
         Text(l(locale, "Risk history", "风险记录"), style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(20.dp))
-        TabRow(selectedTabIndex = tab) {
+        PrimaryTabRow(selectedTabIndex = tab) {
             Tab(selected = tab == 0, onClick = { tab = 0 }, text = { Text(l(locale, "Checks", "检测")) })
             Tab(selected = tab == 1, onClick = { tab = 1 }, text = { Text(l(locale, "Watchlist", "风险观察名单")) })
         }
@@ -948,6 +1193,7 @@ private fun HistoryScreen(state: SageSenseUiState, onOpenEvent: (String) -> Unit
 
 @Composable
 private fun WatchlistPanel(items: List<WatchlistEntity>, locale: String) {
+    val uriHandler = LocalUriHandler.current
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         item {
             Text(
@@ -968,7 +1214,16 @@ private fun WatchlistPanel(items: List<WatchlistEntity>, locale: String) {
                         Text(item.value, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 10.dp))
                     }
                     Text(if (locale == "zh-CN") item.reasonZh else item.reasonEn, style = MaterialTheme.typography.bodyMedium)
-                    Text(item.sourceTitle, color = MaterialTheme.colorScheme.outline, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        l(locale, "Last observed: ${formatTime(item.lastSeen)}", "最近出现：${formatTime(item.lastSeen)}"),
+                        color = MaterialTheme.colorScheme.outline,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    TextButton(onClick = { uriHandler.openUri(item.sourceUrl) }) {
+                        Text(item.sourceTitle)
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, l(locale, "Open source", "打开来源"))
+                    }
                     if (item.seededDemoData) DemoBadge(locale)
                 }
             }
@@ -1029,6 +1284,11 @@ private fun EventDetailScreen(
                         style = MaterialTheme.typography.headlineMedium,
                     )
                     Text("${event.riskScore}/100", color = riskOnColour(event.riskLevel), style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        l(locale, "Rule-based risk score, not a fraud probability", "规则风险分，不是诈骗概率"),
+                        color = riskOnColour(event.riskLevel),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }
@@ -1077,7 +1337,7 @@ private fun EventDetailScreen(
         }
         item {
             Button(onClick = onAsk, modifier = Modifier.fillMaxWidth().heightIn(min = 60.dp)) {
-                Icon(Icons.Default.Chat, null)
+                Icon(Icons.AutoMirrored.Filled.Chat, null)
                 Spacer(Modifier.width(8.dp))
                 Text(l(locale, "Ask why", "询问为什么"))
             }
@@ -1100,6 +1360,10 @@ private fun AgentScreen(
     onAsk: (String) -> Unit,
     onReset: () -> Unit,
 ) {
+    LaunchedEffect(event?.id) {
+        // Do not carry an explanation from one event into another conversation.
+        onReset()
+    }
     var question by remember(event?.id) {
         mutableStateOf(l(locale, "Why is this risky, and what should I do next?", "为什么有风险？我下一步应该怎么做？"))
     }
@@ -1161,6 +1425,18 @@ private fun AgentScreen(
                 ) {
                     Column(Modifier.padding(18.dp)) {
                         Text(agentState.message, style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            l(
+                                locale,
+                                "You can still use the local evidence below: do not open links, do not share codes, and verify through the organisation's official app or website.",
+                                "你仍可依据本机证据采取安全操作：不要点击链接、不要分享验证码，并通过机构官方应用或网站独立核实。",
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(top = 12.dp),
+                        )
+                        event?.signalCodes?.take(3)?.forEach { signal ->
+                            EvidenceRow(signalLabel(signal, locale))
+                        }
                         TextButton(onClick = onReset) { Text(l(locale, "Dismiss", "关闭")) }
                     }
                 }
@@ -1200,7 +1476,7 @@ private fun AgentScreen(
                                     Text(citation.title, style = MaterialTheme.typography.titleMedium)
                                     Text(citation.publisher, style = MaterialTheme.typography.bodyMedium)
                                 }
-                                Icon(Icons.Default.OpenInNew, l(locale, "Open source", "打开来源"))
+                                Icon(Icons.AutoMirrored.Filled.OpenInNew, l(locale, "Open source", "打开来源"))
                             }
                         }
                     }
@@ -1274,7 +1550,7 @@ private fun LearnScreen(locale: String) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.primary,
                         )
-                        Icon(Icons.Default.OpenInNew, null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null, tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -1292,6 +1568,7 @@ private fun SettingsScreen(
     onThemeMode: (ThemeMode) -> Unit,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onClearHistory: () -> Unit,
     onFaq: () -> Unit,
@@ -1306,11 +1583,44 @@ private fun SettingsScreen(
                         Icon(Icons.Default.Language, null, tint = MaterialTheme.colorScheme.primary)
                         Text(l(locale, "Language", "语言"), style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(start = 10.dp))
                     }
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 64.dp)
+                            .toggleable(
+                                value = locale == "zh-CN",
+                                role = Role.Switch,
+                                onValueChange = { onLanguage(if (it) "zh-CN" else "en-AU") },
+                            ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Text("English", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-                        Switch(checked = locale == "zh-CN", onCheckedChange = { onLanguage(if (it) "zh-CN" else "en-AU") })
+                        Switch(checked = locale == "zh-CN", onCheckedChange = null)
                         Text("中文", modifier = Modifier.padding(start = 8.dp), style = MaterialTheme.typography.bodyLarge)
                     }
+                }
+            }
+        }
+        item {
+            Card(elevation = sageCardElevation()) {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(l(locale, "About this prototype", "关于此原型"), style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        l(
+                            locale,
+                            "Version ${BuildConfig.VERSION_NAME} · Catalyst 2026 prototype",
+                            "版本 ${BuildConfig.VERSION_NAME} · Catalyst 2026 原型",
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Text(
+                        l(
+                            locale,
+                            "Automatic message checks support Google Messages and AOSP SMS. The Watchlist contains labelled demo fixtures, not a live threat-intelligence feed. Risk scores are warnings, not proof of fraud.",
+                            "自动消息检测支持 Google Messages 和 AOSP 短信。观察名单包含明确标记的演示数据，并非实时威胁情报。风险分只是警告，不是诈骗定论。",
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }
@@ -1376,6 +1686,7 @@ private fun SettingsScreen(
             Text(l(locale, "Protection access", "防护授权"), style = MaterialTheme.typography.titleLarge)
             StatusRow(Icons.Default.Notifications, l(locale, "Notification access", "通知读取权限"), permissions.notificationAccess, locale, onNotificationAccess)
             StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), permissions.notificationPosting, locale, onNotificationPermission)
+            StatusRow(Icons.Default.Shield, l(locale, "Optional floating warning", "可选悬浮风险警告"), permissions.systemOverlay, locale, onSystemOverlay)
             if (permissions.callScreeningAvailable) {
                 StatusRow(Icons.Default.Call, l(locale, "Call screening role", "来电筛查角色"), permissions.callScreening, locale, onCallRole)
             }

@@ -214,7 +214,7 @@ private fun CognitivePauseCard(
                 color = MaterialTheme.colorScheme.error,
             )
             Text(
-                pauseL(locale, "Wait. This looks like a scam.", "等一下，这很像诈骗。"),
+                pauseL(locale, "Wait. This may be dangerous.", "等一下，这可能有危险。"),
                 style = PauseTitleStyle,
             )
 

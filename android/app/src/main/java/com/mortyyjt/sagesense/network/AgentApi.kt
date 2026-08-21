@@ -4,6 +4,7 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.mortyyjt.sagesense.BuildConfig
 import com.mortyyjt.sagesense.data.RiskEventEntity
 import com.mortyyjt.sagesense.data.WatchlistEntity
+import com.mortyyjt.sagesense.risk.Redactor
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.SerialName
@@ -75,6 +76,32 @@ data class AgentAnswer(
     val degraded: Boolean,
 )
 
+/**
+ * The Agent receives evidence, not identifiers or secrets. Keep this boundary
+ * next to the wire models so future callers cannot accidentally serialize the
+ * Room representation directly.
+ */
+internal object AgentPrivacy {
+    private val url = Regex("(?i)\\b(?:https?://|www\\.)[^\\s<>]+")
+    private val phoneNumber = Regex("(?<![\\d])\\+?\\d[\\d\\s().-]{7,}\\d(?![\\d])")
+    private val labelledOtp = Regex(
+        "(?i)(?:\\botp\\b|\\bone[- ]time (?:code|password)\\b|\\bverification code\\b|\\bsecurity code\\b|验证码|动态码|安全码)\\s*(?:is|:|为|：|-)?\\s*\\d{4,8}\\b",
+    )
+
+    fun redactText(value: String): String = value
+        .replace(url, "[LINK REDACTED]")
+        .let(Redactor::redact)
+        .replace(labelledOtp, "[OTP REDACTED]")
+        .replace(phoneNumber, "[PHONE REDACTED]")
+
+    fun maskPhone(value: String): String {
+        val digits = value.filter(Char::isDigit)
+        if (digits.isEmpty()) return "[PHONE REDACTED]"
+        val maskedPrefix = "•".repeat((digits.length - 2).coerceAtLeast(0))
+        return "[PHONE $maskedPrefix${digits.takeLast(2)}]"
+    }
+}
+
 interface AgentApi {
     @POST("v1/agent/query")
     suspend fun query(@Body body: AgentQueryBody): AgentAnswer
@@ -105,7 +132,7 @@ class AgentClient {
         api.query(
             AgentQueryBody(
                 locale = locale,
-                message = message,
+                message = AgentPrivacy.redactText(message),
                 activeEvent = activeEvent?.toAgentEvent(),
                 recentEvents = recentEvents.take(10).map(RiskEventEntity::toAgentEvent),
                 watchlist = watchlist.take(20).map { it.toAgentWatchlist(locale) },
@@ -114,14 +141,18 @@ class AgentClient {
     }
 }
 
-private fun RiskEventEntity.toAgentEvent() = AgentRiskEvent(
+internal fun RiskEventEntity.toAgentEvent() = AgentRiskEvent(
     id = id,
     sourceType = sourceType,
     occurredAt = Instant.ofEpochMilli(occurredAt).toString(),
-    displaySender = displaySender,
-    senderHash = senderHash,
-    redactedSnippet = redactedSnippet,
-    urls = urls,
+    // Sender labels and hashes are not needed for explanation and are still
+    // identifying data. Domains and signal codes below provide the evidence.
+    displaySender = null,
+    senderHash = null,
+    redactedSnippet = AgentPrivacy.redactText(redactedSnippet),
+    // Full URLs can contain paths, tokens, or query parameters. The extracted
+    // domains remain available as a stable, non-secret evidence signal.
+    urls = emptyList(),
     domains = domains,
     signalCodes = signalCodes,
     riskScore = riskScore,
@@ -129,8 +160,8 @@ private fun RiskEventEntity.toAgentEvent() = AgentRiskEvent(
     relatedCampaignId = relatedCampaignId,
 )
 
-private fun WatchlistEntity.toAgentWatchlist(locale: String) = AgentWatchlistItem(
-    value = value,
+internal fun WatchlistEntity.toAgentWatchlist(locale: String) = AgentWatchlistItem(
+    value = if (entityType.equals("phone", ignoreCase = true)) AgentPrivacy.maskPhone(value) else value,
     entityType = entityType,
     reason = if (locale == "zh-CN") reasonZh else reasonEn,
     sourceTitle = sourceTitle,

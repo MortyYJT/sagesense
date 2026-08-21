@@ -35,6 +35,13 @@ sealed interface AgentUiState {
     data class Error(val message: String) : AgentUiState
 }
 
+sealed interface ManualCheckUiState {
+    data object Idle : ManualCheckUiState
+    data object Checking : ManualCheckUiState
+    data class Success(val eventId: String) : ManualCheckUiState
+    data class Error(val message: String) : ManualCheckUiState
+}
+
 class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
     private val storedPreferences = combine(
         container.preferences.language,
@@ -64,6 +71,9 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
     private val _agentState = MutableStateFlow<AgentUiState>(AgentUiState.Idle)
     val agentState: StateFlow<AgentUiState> = _agentState
 
+    private val _manualCheckState = MutableStateFlow<ManualCheckUiState>(ManualCheckUiState.Idle)
+    val manualCheckState: StateFlow<ManualCheckUiState> = _manualCheckState
+
     fun setLanguage(locale: String) {
         viewModelScope.launch { container.preferences.setLanguage(locale) }
     }
@@ -86,6 +96,35 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
 
     fun resetAgent() {
         _agentState.value = AgentUiState.Idle
+    }
+
+    fun checkManually(sender: String, content: String) {
+        if (sender.isBlank() && content.isBlank()) return
+        viewModelScope.launch {
+            _manualCheckState.value = ManualCheckUiState.Checking
+            _manualCheckState.value = runCatching {
+                container.riskRepository.analyseAndStore(
+                    sourceType = "manual",
+                    sender = sender.trim().takeIf(String::isNotEmpty),
+                    text = content.trim().ifBlank { sender.trim() },
+                )
+            }.fold(
+                onSuccess = { ManualCheckUiState.Success(it.id) },
+                onFailure = {
+                    ManualCheckUiState.Error(
+                        if (uiState.value.locale == "zh-CN") {
+                            "本机检测暂时失败，请重试。"
+                        } else {
+                            "The local check could not finish. Please try again."
+                        },
+                    )
+                },
+            )
+        }
+    }
+
+    fun resetManualCheck() {
+        _manualCheckState.value = ManualCheckUiState.Idle
     }
 
     fun askAgent(message: String, activeEventId: String?) {
