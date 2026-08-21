@@ -20,6 +20,13 @@ The primary persona is an older adult who uses calls and messaging but may hesit
 
 ### Onboarding and permissions
 
+- On a fresh installation, show the protection setup prompt automatically once
+  after the first screen is ready. Persist `permission_setup_prompt_seen`
+  immediately when it is shown so closing, skipping, denying, or restarting
+  does not cause repeated automatic prompts.
+- Keep manual re-entry from onboarding and Settings so the user can review or
+  enable protection later. Existing installations that have completed
+  onboarding must not receive an unexpected new prompt.
 - Explain notification access, visible-notification permission, call-screening role, local processing, and Agent data transfer before the relevant action.
 - Notification access, visible-notification permission, and the call-screening role (when available) are optional and can be reviewed or disabled in Android Settings.
 - If access is declined or revoked, only the related protection shows OFF; local features such as History and Learn remain available.
@@ -34,7 +41,13 @@ The primary persona is an older adult who uses calls and messaging but may hesit
 
 ### Cognitive Pause warning
 
-- Keep the status-bar warning as a silent system entry and show one authoritative in-app Cognitive Pause layer for a newly observed medium/high event.
+- Use separate alert behaviour for real messages, Watchlist calls, and seeded
+  demo events. Real-message warnings are high-priority with one audible and
+  vibrating alert; call warnings are visible with one vibration while the call
+  continues ringing; seeded demos are silent and clearly labelled.
+- Keep one authoritative in-app Cognitive Pause layer for a newly observed
+  medium/high event. Do not use an always-on overlay, AccessibilityService,
+  or full-screen intent.
 - Use a dimmed background, a high-contrast bilingual card, one short haptic, and clear `See Why` / `Not Now` actions; do not queue repeated overlays while one is visible.
 - State that the warning is evidence, not a fraud verdict, and that SageSense does not block calls, make payments or contact organisations.
 - For Watchlist calls, state `Local Watchlist match` and `Call not blocked`; for seeded scenarios, label the card `Demo simulation · Seeded demo data`.
@@ -57,7 +70,12 @@ The primary persona is an older adult who uses calls and messaging but may hesit
 ### Learn and accessibility
 
 - Present short bilingual lessons linking to official sources.
-- Use high contrast, large type, 48–56dp targets, TalkBack descriptions, and text as well as colour for risk.
+- Follow the design baseline of low information density, all app-defined
+  visible text styles at least 22sp, and touch targets at least 56dp. Use Atkinson
+  Hyperlegible globally for supported Latin glyphs with Android system CJK
+  fallback, plus TalkBack descriptions and text as well as colour for risk.
+  At 1.3× and 2.0× system font scale, use an adaptive two-by-two bottom
+  navigation layout to prevent label clipping.
 
 ## Non-goals
 

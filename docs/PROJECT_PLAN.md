@@ -1,13 +1,17 @@
 # SageSense delivery plan
 
-Last updated: Friday, 21 August 2026, 15:15 AEST
+Last updated: Friday, 21 August 2026, 18:30 AEST
+
+Release status: installable debug RC built Friday night; code freeze Saturday, 22
+August 2026 at 12:00 AEST. Physical-device checks are still pending and must
+not be described as passed until recorded in the test report.
 
 ## Team responsibilities
 
 | Member | GitHub | Primary responsibility | Required hand-off |
 |---|---|---|---|
 | Yu Junteng | `MortyYJT` | Team lead; FastAPI, OpenCode Go Agent, data contracts, Android integration, release APK and Devpost | Stable `/v1/agent/query`, merged build, deployed URL and final submission |
-| Jiahui Zhou | `jzhou612` | Sole active UI owner: Compose screens, bilingual copy, accessibility and restrained motion | Reviewable UI branch, screenshots and accessibility evidence |
+| Jiahui Zhou | `jzhou612` | Sole active UI owner: Compose screens, bilingual copy, accessibility, mascot integration and restrained motion | Reviewable UI branch, screenshots and accessibility evidence |
 | Yijia Sheng | `sarahkaliyah` | First-launch permission setup, device QA, PRD, divergence log, source register and submission ZIP | Permission flow PR, signed device test report and clean submission archive |
 | Xiuning Gu | `xiuningg` | Storyboard, screen recording, editing, subtitles, publishing and final pitch | Reusable real-device clips, final 4:30 video and presentation script |
 | Junteng Hu | `H0sst` | Unavailable for the current delivery sprint | No implementation or review task assigned |
@@ -18,26 +22,29 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 
 ### Complete locally
 
-- Android project builds a 20 MiB debug APK with Kotlin, Compose, Room, DataStore and manual dependency injection.
+- Android project builds a 20.21 MiB debug APK with Kotlin, Compose, Room, DataStore and manual dependency injection.
 - Notification listener, call-screening service, local risk engine, Watchlist, Personal Scam Memory and deep-linked alerts are implemented.
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
 - The backend is deployed at `https://sagesense.vercel.app`; a Sensitive `OPENCODE_API_KEY` routes DeepSeek V4 Flash through OpenCode Go. A production query returned `degraded=false` with allowlisted citations.
 - An Android emulator is connected as `emulator-5554`. No physical phone has been verified yet.
-- Yijia Sheng's `ba2eae5` adds a unified permission setup dialog on `main`. Unit tests, lint and APK assembly pass, but repeat-prompt behaviour, first-launch persistence and accessibility still need acceptance testing.
+- Yijia Sheng's unified permission setup dialog is integrated with a persisted one-time fresh-install prompt. Emulator clear-data, dismiss and force-stop/relaunch checks pass; physical-device allow/deny/back cases remain pending.
+- Jiahui Zhou's UI contribution from `origin/ui/jzhou612-anti-scam-mascot` (`920fcc7`) is integrated on `codex/release-hardening`; the original large PNG was replaced by the provenance-recorded 512×512 transparent WebP.
 - Curated bilingual knowledge cards, PRD, design-divergence record, source register, test report, video script and submission checklist exist.
 - Deterministic anti-scam topic gating, bounded request schemas, and prompt-extraction rejection run before any provider call.
 - The prototype has a process-local best-effort limiter of 8 requests/minute and 2 concurrent requests per client; durable multi-instance enforcement remains a Vercel WAF responsibility.
 - Curated knowledge retrieval now uses weighted bilingual lexical matching with stable ordering; no-match queries return no citations. No vector database is intentionally in scope for this small curated corpus.
-- Backend tests pass: 22 on the current local tree. Current Android verification passes with 9 tests and 0 failures, lint 0 errors (7 dependency-version warnings only), and a successful debug APK build.
+- Backend tests pass: 22 on the current local tree. Android verification passes with 17 tests and 0 failures, lint 0 errors (11 non-blocking warnings), and a production-URL debug APK build.
+- Emulator evidence passes for the one-time permission prompt, bilingual seeded notification → Cognitive Pause → detail, adaptive 1.3×/2.0× fonts, Agent success with actions/citations through an ADB localhost tunnel, safe offline failure, and a seeded Watchlist call that remains `RINGING` while the bilingual call warning is visible.
 
 ### Still required
 
-- Harden the first-launch permission prompt and verify its allow, deny, back, skip, no-repeat and Settings re-entry states.
-- Connect a physical Android phone and complete notification, call role, offline, TalkBack, large-text and delete-history checks.
+- Connect a physical Android phone and complete permission allow, deny, back and Settings re-entry; foreground/background notification; call role; offline; TalkBack; large-text; and delete-history checks.
 - Build the APK with `https://sagesense.vercel.app/` and verify the Android-to-Agent path on-device.
-- Review and polish the Compose UI against Jiahui's final design decisions.
+- Keep the backend API contract frozen during release hardening; no Agent
+  request/response or provider configuration changes are planned.
 - Keep the backend scope constrained to curated local knowledge: it has no arbitrary live web browsing and no vector database by design. A future production deployment still needs WAF-level multi-instance rate enforcement.
+- Merge the reviewed release-hardening commits to `main` now; do not create the final submission tag until Saturday's physical-device gate passes.
 - Capture real-device clips, complete the video, prepare Devpost, build the clean ZIP and test every public link while logged out.
 
 ## Schedule
@@ -51,28 +58,28 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - Yu Junteng freezes the deployed Agent contract, prepares the production-base-URL APK and connects a physical phone.
 - Xiuning Gu locks the 4:30 storyboard, file naming and subtitle template; emulator clips may be used as temporary edit placeholders only.
 
-**16:00–19:00 — first physical-device integration**
+**16:00–19:00 — release-candidate integration**
 
-- Complete first launch → permissions → notification → risk detail → history → cited Agent answer on the physical phone.
-- Validate bilingual copy, source citations, offline/degraded behaviour and Personal Scam Memory.
-- Save the first usable screen recordings before the end of the day.
+- Integrate the UI branch, harden permissions/alerts/accessibility, run automated tests and build the production-URL debug RC.
+- Validate bilingual copy, source citations, offline/degraded behaviour, Personal Scam Memory and virtual Watchlist calls in the emulator.
+- Record exact APK size/SHA and leave every unrun physical-device row Pending.
 
-**Friday exit condition:** the complete core demo path works on a real phone. Every failure is recorded with an owner.
+**Friday exit condition:** an installable RC exists with passing automated and emulator evidence; the team stops development for the night. Physical-device acceptance remains the first Saturday gate.
 
 ### Saturday, 22 August
 
-- 09:00–12:00: call warning, Watchlist and Personal Scam Memory device verification.
-- 12:00–15:00: Learn, Settings, accessibility, test completion and release APK.
-- 15:00: feature freeze. Remove unstable optional work rather than risking the core flow.
-- 15:00–17:00: final QA, screenshots, README, attribution and divergence review.
-- 17:00–21:00: recording, edit, subtitles and Devpost.
-- 21:00–23:00: release candidate, clean ZIP, public-link checks and backups.
+- 09:00–11:00: physical-device tests for fresh-install permissions, foreground/background messages, Watchlist calls, English/Chinese, TalkBack, 1.3×/2.0× fonts, Agent online/offline and delete history.
+- 11:00–11:30: fix only P0/P1 core-demo blockers; do not add features.
+- 11:30–12:00: rebuild, rerun smoke checks, merge `main`, generate the final APK and create `catalyst-2026-submission` only if the physical-device gate passes.
+- 13:00–17:00: record the real-device demo, architecture/privacy proof and team clips.
+- 17:00–21:00: edit, subtitles, Devpost, README screenshots and attribution review.
+- 21:00–23:00: clean ZIP, public-link checks and backups.
 
 ### Sunday, 23 August
 
 - 07:00: fresh-install physical-device smoke test.
 - 08:00: upload the public/unlisted video and verify it while logged out.
-- 09:15: code freeze and tag `catalyst-2026-submission`.
+- 09:15: verify the existing physical-device-approved submission tag and public artifacts; do not retag unchanged code.
 - 09:30: internal submission deadline, leaving 30 minutes before the official 10:00 deadline.
 
 ## Scope-cut order
