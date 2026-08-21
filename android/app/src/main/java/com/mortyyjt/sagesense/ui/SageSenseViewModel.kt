@@ -7,6 +7,7 @@ import com.mortyyjt.sagesense.AppContainer
 import com.mortyyjt.sagesense.data.RiskEventEntity
 import com.mortyyjt.sagesense.data.WatchlistEntity
 import com.mortyyjt.sagesense.network.AgentAnswer
+import com.mortyyjt.sagesense.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +19,7 @@ data class SageSenseUiState(
     val events: List<RiskEventEntity> = emptyList(),
     val watchlist: List<WatchlistEntity> = emptyList(),
     val locale: String = "en-AU",
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val onboardingComplete: Boolean = false,
     val ready: Boolean = false,
 )
@@ -35,8 +37,16 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
         container.riskRepository.watchlist,
         container.preferences.language,
         container.preferences.onboardingComplete,
-    ) { events, watchlist, locale, onboarding ->
-        SageSenseUiState(events, watchlist, locale, onboarding, ready = true)
+        container.preferences.themeMode,
+    ) { events, watchlist, locale, onboarding, themeMode ->
+        SageSenseUiState(
+            events = events,
+            watchlist = watchlist,
+            locale = locale,
+            themeMode = ThemeMode.fromStorage(themeMode),
+            onboardingComplete = onboarding,
+            ready = true,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SageSenseUiState())
 
     private val _agentState = MutableStateFlow<AgentUiState>(AgentUiState.Idle)
@@ -44,6 +54,10 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
 
     fun setLanguage(locale: String) {
         viewModelScope.launch { container.preferences.setLanguage(locale) }
+    }
+
+    fun setThemeMode(themeMode: ThemeMode) {
+        viewModelScope.launch { container.preferences.setThemeMode(themeMode.storageValue) }
     }
 
     fun completeOnboarding() {

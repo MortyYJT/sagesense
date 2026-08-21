@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mortyyjt.sagesense.ui.SageSenseApp
 import com.mortyyjt.sagesense.ui.SageSenseViewModel
 import com.mortyyjt.sagesense.ui.theme.SageSenseTheme
@@ -24,7 +25,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         pendingEventId = intent.eventId()
         setContent {
-            SageSenseTheme {
+            val state by viewModel.uiState.collectAsStateWithLifecycle()
+            SageSenseTheme(themeMode = state.themeMode) {
                 SageSenseApp(
                     viewModel = viewModel,
                     initialEventId = pendingEventId,

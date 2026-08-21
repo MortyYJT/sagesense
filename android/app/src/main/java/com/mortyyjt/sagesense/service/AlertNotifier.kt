@@ -25,13 +25,16 @@ object AlertNotifier {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
             NotificationChannel(ALERT_CHANNEL, "Risk warnings", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Warnings about suspicious messages and calls"
-                enableVibration(true)
+                description = "Silent status-bar entry for suspicious messages and calls"
+                enableVibration(false)
+                setSound(null, null)
             },
         )
         manager.createNotificationChannel(
             NotificationChannel(DEMO_CHANNEL, "Seeded demo messages", NotificationManager.IMPORTANCE_HIGH).apply {
                 description = "Clearly labelled inputs for the Catalyst demo"
+                enableVibration(false)
+                setSound(null, null)
             },
         )
     }
@@ -62,6 +65,8 @@ object AlertNotifier {
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
             .build()
@@ -80,6 +85,8 @@ object AlertNotifier {
                 ),
             )
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOnlyAlertOnce(true)
+            .setSilent(true)
             .setAutoCancel(true)
             .build()
         notifyAfterPermissionCheck(context, 88001, notification)

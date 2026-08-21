@@ -21,7 +21,9 @@ The primary persona is an older adult who uses calls and messaging but may hesit
 ### Onboarding and permissions
 
 - Explain notification access, visible-notification permission, call-screening role, local processing, and Agent data transfer before the relevant action.
-- Permissions remain optional and can be reviewed later.
+- Notification access, visible-notification permission, and the call-screening role (when available) are optional and can be reviewed or disabled in Android Settings.
+- If access is declined or revoked, only the related protection shows OFF; local features such as History and Learn remain available.
+- If Android blocks a repeated call-screening request, provide a recovery path to Default apps with clear instructions to select Caller ID & spam app and then SageSense.
 
 ### Automatic detection
 
@@ -29,6 +31,14 @@ The primary persona is an older adult who uses calls and messaging but may hesit
 - Produce a score from 0–100: low below 30, medium 30–59, high 60 or above.
 - Store a redacted event and show a deep-linked alert for medium/high risk.
 - Query calls against the local Watchlist within three seconds; never reject, silence, or remove a call from the log.
+
+### Cognitive Pause warning
+
+- Keep the status-bar warning as a silent system entry and show one authoritative in-app Cognitive Pause layer for a newly observed medium/high event.
+- Use a dimmed background, a high-contrast bilingual card, one short haptic, and clear `See Why` / `Not Now` actions; do not queue repeated overlays while one is visible.
+- State that the warning is evidence, not a fraud verdict, and that SageSense does not block calls, make payments or contact organisations.
+- For Watchlist calls, state `Local Watchlist match` and `Call not blocked`; for seeded scenarios, label the card `Demo simulation · Seeded demo data`.
+- Keep the hackathon implementation inside the Compose app. Do not request `SYSTEM_ALERT_WINDOW` or describe the simulation as a cross-app system overlay.
 
 ### History and Personal Scam Memory
 

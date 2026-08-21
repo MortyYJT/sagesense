@@ -13,9 +13,11 @@ private val Context.dataStore by preferencesDataStore(name = "sagesense_preferen
 class PreferencesStore(private val context: Context) {
     private val languageKey = stringPreferencesKey("language")
     private val onboardingKey = booleanPreferencesKey("onboarding_complete")
+    private val themeModeKey = stringPreferencesKey("theme_mode")
 
     val language: Flow<String> = context.dataStore.data.map { it[languageKey] ?: "en-AU" }
     val onboardingComplete: Flow<Boolean> = context.dataStore.data.map { it[onboardingKey] ?: false }
+    val themeMode: Flow<String> = context.dataStore.data.map { it[themeModeKey] ?: "system" }
 
     suspend fun setLanguage(value: String) {
         context.dataStore.edit { it[languageKey] = value }
@@ -23,5 +25,9 @@ class PreferencesStore(private val context: Context) {
 
     suspend fun completeOnboarding() {
         context.dataStore.edit { it[onboardingKey] = true }
+    }
+
+    suspend fun setThemeMode(value: String) {
+        context.dataStore.edit { it[themeModeKey] = value }
     }
 }

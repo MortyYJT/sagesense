@@ -11,6 +11,7 @@
 | Learn and FAQ | Kept, merged into Learn plus settings privacy explanations | Reduces navigation density | Short lessons link to official sources |
 | Static alerts | Expanded with history and Personal Scam Memory | Repeated campaigns often change sender identity | Helps users recognise a pattern, not only one message |
 | Single-language prototype | Expanded to English and Simplified Chinese | Improves access for multilingual older users | Content remains low-density in either language |
+| Generic system sans-serif typography on FAQ & Safety | Changed to Atkinson Hyperlegible for supported Latin text, with Android system CJK fallback | More distinguishable Latin letterforms improve readability; the fallback keeps Chinese complete and legible | The typeface is scoped to the new FAQ & Safety page so existing screens retain their established typography |
 | Stored message content | Changed to redacted structured events | Raw sensitive data is unnecessary for the demo | Privacy-by-default supports trust and informed consent |
 
 Original creator credit: **Billy Hermawan**, Sixth Sense Product-thon project. No original design assets are redistributed.
