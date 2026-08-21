@@ -53,6 +53,25 @@ class RiskEventRepository(
         eventDao.deleteOlderThan(cutoff)
     }
 
+    /**
+     * Rewrites rows created by pre-hardening builds through the current
+     * persistence privacy boundary. The operation is idempotent and does not
+     * alter risk evidence, timestamps, or the seeded-demo label.
+     */
+    suspend fun minimiseExistingHistory(): Int {
+        val updates = eventDao.allForPrivacyMigration().mapNotNull { event ->
+            val safe = event.copy(
+                displaySender = EventPersistencePrivacy.sanitiseDisplaySender(event.displaySender),
+                senderHash = null,
+                redactedSnippet = EventPersistencePrivacy.sanitiseSnippetForStorage(event.redactedSnippet),
+                urls = EventPersistencePrivacy.sanitiseUrlsForStorage(event.urls),
+            )
+            safe.takeIf { it != event }
+        }
+        if (updates.isNotEmpty()) eventDao.upsertAll(updates)
+        return updates.size
+    }
+
     suspend fun seedDemoData() {
         val watchlist = listOf(
             WatchlistEntity(

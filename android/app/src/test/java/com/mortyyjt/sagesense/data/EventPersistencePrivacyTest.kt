@@ -57,6 +57,7 @@ class EventPersistencePrivacyTest {
         assertFalse(result.contains("hunter2"))
         assertFalse(result.contains("481516"))
         assertFalse(result.contains("private"))
+        assertEquals(result, EventPersistencePrivacy.sanitiseSnippetForStorage(result))
     }
 
     @Test
@@ -64,6 +65,18 @@ class EventPersistencePrivacyTest {
         assertNull(EventPersistencePrivacy.sanitiseUrlForStorage("ftp://evil.example/file"))
         assertNull(EventPersistencePrivacy.sanitiseUrlForStorage("https://user:secret@evil.example/path"))
         assertNull(EventPersistencePrivacy.sanitiseUrlForStorage("not a URL"))
+    }
+
+    @Test
+    fun truncationNeverLeavesANonIdempotentPartialLinkMarker() {
+        val result = EventPersistencePrivacy.sanitiseSnippetForStorage(
+            "A".repeat(480) + " https://evil.example/login?token=private",
+        )
+
+        assertTrue(result.length <= 500)
+        assertFalse(result.contains("token=private"))
+        assertFalse(result.contains("[LINK ORIGIN:") && !result.endsWith(']'))
+        assertEquals(result, EventPersistencePrivacy.sanitiseSnippetForStorage(result))
     }
 
     @Test

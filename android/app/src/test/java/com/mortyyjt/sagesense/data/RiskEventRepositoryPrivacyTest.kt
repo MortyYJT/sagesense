@@ -30,18 +30,56 @@ class RiskEventRepositoryPrivacyTest {
         assertFalse(stored.urls.single().contains("private"))
     }
 
-    private class CapturingRiskEventDao : RiskEventDao {
-        var stored: RiskEventEntity? = null
+    @Test
+    fun rewritesLegacyRowsOnceAndIsIdempotent() = runTest {
+        val eventDao = CapturingRiskEventDao()
+        val repository = RiskEventRepository(eventDao, EmptyWatchlistDao(), RiskAnalyzer())
+        val legacy = RiskEventEntity(
+            id = "legacy-event",
+            sourceType = "notification",
+            occurredAt = 1234L,
+            displaySender = "+61 400 000 999",
+            senderHash = "legacy-stable-hash",
+            redactedSnippet = "Password: hunter2 at https://evil.example/login?token=private",
+            urls = listOf("https://evil.example/login?token=private"),
+            domains = listOf("evil.example"),
+            signalCodes = listOf("SUSPICIOUS_URL", "CREDENTIAL_REQUEST"),
+            riskScore = 50,
+            riskLevel = com.mortyyjt.sagesense.risk.RiskLevel.MEDIUM,
+            relatedCampaignId = "campaign-id",
+            seededDemoData = false,
+        )
+        eventDao.upsert(legacy)
 
-        override fun observeAll(): Flow<List<RiskEventEntity>> = flowOf(emptyList())
-        override suspend fun findById(id: String): RiskEventEntity? = stored?.takeIf { it.id == id }
-        override suspend fun recent(limit: Int): List<RiskEventEntity> = listOfNotNull(stored).take(limit)
+        assertEquals(1, repository.minimiseExistingHistory())
+        val migrated = requireNotNull(eventDao.findById(legacy.id))
+        assertEquals("[PHONE REDACTED]", migrated.displaySender)
+        assertNull(migrated.senderHash)
+        assertEquals("Password: [REDACTED] at [LINK ORIGIN: https://evil.example]", migrated.redactedSnippet)
+        assertEquals(listOf("https://evil.example"), migrated.urls)
+        assertEquals(legacy.occurredAt, migrated.occurredAt)
+        assertEquals(legacy.signalCodes, migrated.signalCodes)
+        assertEquals(0, repository.minimiseExistingHistory())
+        assertEquals(migrated, eventDao.findById(legacy.id))
+    }
+
+    private class CapturingRiskEventDao : RiskEventDao {
+        private val rows = linkedMapOf<String, RiskEventEntity>()
+        val stored: RiskEventEntity? get() = rows.values.lastOrNull()
+
+        override fun observeAll(): Flow<List<RiskEventEntity>> = flowOf(rows.values.toList())
+        override suspend fun findById(id: String): RiskEventEntity? = rows[id]
+        override suspend fun recent(limit: Int): List<RiskEventEntity> = rows.values.reversed().take(limit)
+        override suspend fun allForPrivacyMigration(): List<RiskEventEntity> = rows.values.toList()
         override suspend fun related(campaignId: String, eventId: String): List<RiskEventEntity> = emptyList()
         override suspend fun upsert(event: RiskEventEntity) {
-            stored = event
+            rows[event.id] = event
+        }
+        override suspend fun upsertAll(events: List<RiskEventEntity>) {
+            events.forEach { rows[it.id] = it }
         }
         override suspend fun deleteAll() {
-            stored = null
+            rows.clear()
         }
         override suspend fun deleteOlderThan(cutoff: Long) = Unit
     }

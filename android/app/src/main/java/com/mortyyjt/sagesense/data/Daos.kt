@@ -17,11 +17,17 @@ interface RiskEventDao {
     @Query("SELECT * FROM risk_events ORDER BY occurredAt DESC LIMIT :limit")
     suspend fun recent(limit: Int): List<RiskEventEntity>
 
+    @Query("SELECT * FROM risk_events ORDER BY occurredAt ASC")
+    suspend fun allForPrivacyMigration(): List<RiskEventEntity>
+
     @Query("SELECT * FROM risk_events WHERE relatedCampaignId = :campaignId AND id != :eventId ORDER BY occurredAt DESC")
     suspend fun related(campaignId: String, eventId: String): List<RiskEventEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(event: RiskEventEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAll(events: List<RiskEventEntity>)
 
     @Query("DELETE FROM risk_events")
     suspend fun deleteAll()

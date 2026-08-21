@@ -3,6 +3,7 @@ package com.mortyyjt.sagesense.data
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -15,11 +16,13 @@ class PreferencesStore(private val context: Context) {
     private val onboardingKey = booleanPreferencesKey("onboarding_complete")
     private val permissionSetupPromptSeenKey = booleanPreferencesKey("permission_setup_prompt_seen")
     private val themeModeKey = stringPreferencesKey("theme_mode")
+    private val historyPrivacyVersionKey = intPreferencesKey("history_privacy_version")
 
     val language: Flow<String> = context.dataStore.data.map { it[languageKey] ?: "en-AU" }
     val onboardingComplete: Flow<Boolean> = context.dataStore.data.map { it[onboardingKey] ?: false }
     val permissionSetupPromptSeen: Flow<Boolean> = context.dataStore.data.map { it[permissionSetupPromptSeenKey] ?: false }
     val themeMode: Flow<String> = context.dataStore.data.map { it[themeModeKey] ?: "system" }
+    val historyPrivacyVersion: Flow<Int> = context.dataStore.data.map { it[historyPrivacyVersionKey] ?: 0 }
 
     suspend fun setLanguage(value: String) {
         context.dataStore.edit { it[languageKey] = value }
@@ -35,5 +38,12 @@ class PreferencesStore(private val context: Context) {
 
     suspend fun setThemeMode(value: String) {
         context.dataStore.edit { it[themeModeKey] = value }
+    }
+
+    suspend fun markHistoryPrivacyVersion(version: Int) {
+        context.dataStore.edit { preferences ->
+            val current = preferences[historyPrivacyVersionKey] ?: 0
+            if (version > current) preferences[historyPrivacyVersionKey] = version
+        }
     }
 }
