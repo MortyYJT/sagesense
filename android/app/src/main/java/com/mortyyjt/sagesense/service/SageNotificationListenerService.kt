@@ -8,11 +8,18 @@ import com.mortyyjt.sagesense.risk.RiskLevel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class SageNotificationListenerService : NotificationListenerService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val deduplicator = NotificationDeduplicator()
+
+    override fun onDestroy() {
+        serviceScope.cancel()
+        super.onDestroy()
+    }
 
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         if (
@@ -34,6 +41,7 @@ class SageNotificationListenerService : NotificationListenerService() {
             extras.getCharSequence(Notification.EXTRA_TEXT),
         ).filterNotNull().map(CharSequence::toString).firstOrNull { it.isNotBlank() } ?: return
         if (sbn.packageName == packageName && sbn.notification.channelId != AlertNotifier.DEMO_CHANNEL) return
+        if (!deduplicator.shouldProcess(sbn.key, title, text)) return
 
         val app = application as SageSenseApplication
         serviceScope.launch {

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SageSense</string>
+    <string name="app_name" translatable="false">SageSense</string>
+    <string name="notification_service_label">SageSense notification protection</string>
+    <string name="call_service_label">SageSense call warnings</string>
 </resources>

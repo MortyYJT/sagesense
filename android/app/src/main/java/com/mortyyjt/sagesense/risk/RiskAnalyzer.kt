@@ -179,6 +179,22 @@ class RiskAnalyzer(private val weights: RiskWeights = RiskWeights()) {
     }
 
     companion object {
-        fun normaliseEntity(value: String): String = value.lowercase(Locale.ROOT).replace(Regex("[^a-z0-9+]"), "")
+        fun normaliseEntity(value: String): String {
+            val digits = value.filter(Char::isDigit)
+            val phoneLike = digits.length >= 7 && (
+                value.none(Char::isLetter) || value.startsWith("phone:", ignoreCase = true)
+            )
+            if (phoneLike) {
+                // Android can surface the same Australian caller as 0400...,
+                // 61400..., or +61 400.... Use one stable Watchlist key.
+                val canonicalDigits = if (digits.length == 10 && digits.startsWith('0')) {
+                    "61${digits.drop(1)}"
+                } else {
+                    digits
+                }
+                return "phone:$canonicalDigits"
+            }
+            return value.lowercase(Locale.ROOT).replace(Regex("[^a-z0-9+]"), "")
+        }
     }
 }

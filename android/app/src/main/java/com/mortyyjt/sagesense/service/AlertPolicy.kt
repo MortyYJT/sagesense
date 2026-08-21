@@ -1,5 +1,7 @@
 package com.mortyyjt.sagesense.service
 
+import android.app.NotificationManager
+import androidx.core.app.NotificationCompat
 import com.mortyyjt.sagesense.data.RiskEventEntity
 import com.mortyyjt.sagesense.risk.RiskLevel
 
@@ -9,9 +11,64 @@ internal enum class AlertChannelKind {
     SEEDED_DEMO,
 }
 
+internal data class AlertDeliveryPolicy(
+    val importance: Int,
+    val compatPriority: Int,
+    val soundEnabled: Boolean,
+    val vibrationEnabled: Boolean,
+    val silent: Boolean,
+)
+
+internal data class AlertChannelCopy(
+    val name: String,
+    val description: String,
+)
+
+internal fun alertChannelCopy(kind: AlertChannelKind, locale: String): AlertChannelCopy {
+    val chinese = locale == "zh-CN"
+    return when (kind) {
+        AlertChannelKind.MESSAGE_RISK -> AlertChannelCopy(
+            name = if (chinese) "消息风险警告" else "Message risk warnings",
+            description = if (chinese) "为可疑消息显示醒目的风险警告" else "Visible warnings for suspicious message notifications",
+        )
+        AlertChannelKind.CALL_RISK -> AlertChannelCopy(
+            name = if (chinese) "来电风险警告" else "Call risk warnings",
+            description = if (chinese) "号码命中本机风险观察名单时显示警告，电话仍会继续响铃" else "Visible warnings for numbers on the local Risk Watchlist; calls keep ringing",
+        )
+        AlertChannelKind.SEEDED_DEMO -> AlertChannelCopy(
+            name = if (chinese) "预置演示消息" else "Seeded demo messages",
+            description = if (chinese) "用于 Catalyst 演示的明确标记测试通知" else "Clearly labelled inputs for the Catalyst demo",
+        )
+    }
+}
+
+internal fun alertDeliveryPolicy(kind: AlertChannelKind): AlertDeliveryPolicy = when (kind) {
+    AlertChannelKind.MESSAGE_RISK -> AlertDeliveryPolicy(
+        importance = NotificationManager.IMPORTANCE_HIGH,
+        compatPriority = NotificationCompat.PRIORITY_HIGH,
+        soundEnabled = true,
+        vibrationEnabled = true,
+        silent = false,
+    )
+    AlertChannelKind.CALL_RISK -> AlertDeliveryPolicy(
+        importance = NotificationManager.IMPORTANCE_HIGH,
+        compatPriority = NotificationCompat.PRIORITY_HIGH,
+        soundEnabled = false,
+        vibrationEnabled = true,
+        silent = false,
+    )
+    AlertChannelKind.SEEDED_DEMO -> AlertDeliveryPolicy(
+        importance = NotificationManager.IMPORTANCE_DEFAULT,
+        compatPriority = NotificationCompat.PRIORITY_DEFAULT,
+        soundEnabled = false,
+        vibrationEnabled = false,
+        silent = true,
+    )
+}
+
 internal fun alertChannelKind(event: RiskEventEntity): AlertChannelKind = when {
-    event.sourceType == "call" -> AlertChannelKind.CALL_RISK
     event.seededDemoData -> AlertChannelKind.SEEDED_DEMO
+    event.sourceType == "call" -> AlertChannelKind.CALL_RISK
     else -> AlertChannelKind.MESSAGE_RISK
 }
 

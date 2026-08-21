@@ -64,6 +64,16 @@ class RiskAnalyzerTest {
     }
 
     @Test
+    fun australianLocalAndInternationalPhoneFormatsMatch() {
+        val international = RiskAnalyzer.normaliseEntity("+61 400 000 999")
+
+        assertEquals(international, RiskAnalyzer.normaliseEntity("61400000999"))
+        assertEquals(international, RiskAnalyzer.normaliseEntity("0400 000 999"))
+        assertEquals(international, RiskAnalyzer.normaliseEntity(international))
+        assertEquals("commbankexample", RiskAnalyzer.normaliseEntity("CommBank.Example"))
+    }
+
+    @Test
     fun repeatedTemplateHasStableCampaignFingerprint() {
         val first = analyzer.analyse("Urgent: verify account 1234 at https://bank-help.example")
         val second = analyzer.analyse("Urgent: verify account 9876 at https://bank-help.example")

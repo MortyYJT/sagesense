@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_service_label">SageSense 通知防护</string>
+    <string name="call_service_label">SageSense 来电风险警告</string>
+</resources>

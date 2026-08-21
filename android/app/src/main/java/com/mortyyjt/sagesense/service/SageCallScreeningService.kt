@@ -4,16 +4,10 @@ import android.telecom.Call
 import android.telecom.CallScreeningService
 import com.mortyyjt.sagesense.SageSenseApplication
 import com.mortyyjt.sagesense.risk.RiskAnalyzer
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.flow.first
 
 class SageCallScreeningService : CallScreeningService() {
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     override fun onScreenCall(callDetails: Call.Details) {
         val response = CallResponse.Builder()
             .setDisallowCall(false)
@@ -32,7 +26,10 @@ class SageCallScreeningService : CallScreeningService() {
         respondToCall(callDetails, response)
 
         val app = application as SageSenseApplication
-        serviceScope.launch {
+        // Telecom normally releases this bound service as soon as the allow
+        // response above arrives. Application-scoped, bounded work prevents the
+        // local Watchlist warning from being cancelled during that unbind.
+        app.launchBackground {
             val match = withTimeoutOrNull(3_000) {
                 app.container.database.watchlistDao().findNormalised(RiskAnalyzer.normaliseEntity(number))
             }
@@ -44,7 +41,7 @@ class SageCallScreeningService : CallScreeningService() {
                     seededDemoData = match.seededDemoData,
                 )
                 val locale = app.container.preferences.language.first()
-                AlertNotifier.showRisk(this@SageCallScreeningService, event, locale = locale)
+                AlertNotifier.showRisk(app, event, locale = locale)
             }
         }
     }
