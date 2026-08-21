@@ -1,0 +1,30 @@
+# Local development environments and SDKs
+.android-sdk/
+.jdk17/
+.venv/
+.gradle/
+.kotlin/
+.idea/
+.vercel/
+
+# Mobile application and generated artifacts are not part of the FastAPI deploy
+android/
+captures/
+**/build/
+*.apk
+*.aab
+
+# Local secrets, caches, tests and working material
+.env
+.env.*
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+backend/tests/
+tmp/
+.DS_Store
+
+# Repository-only automation
+.git/
+.github/
