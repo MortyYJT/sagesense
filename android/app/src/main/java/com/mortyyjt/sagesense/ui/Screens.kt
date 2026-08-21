@@ -29,8 +29,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -78,6 +80,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -142,6 +145,7 @@ fun SageSenseApp(
     val agentState by viewModel.agentState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var permissionState by remember { mutableStateOf(context.readPermissionState()) }
+    var showPermissionSetup by rememberSaveable { mutableStateOf(false) }
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, context) {
         val observer = LifecycleEventObserver { _, event ->
@@ -172,20 +176,41 @@ fun SageSenseApp(
         }
     }
 
+    LaunchedEffect(state.ready, state.onboardingComplete) {
+        val allAvailableProtectionEnabled = permissionState.notificationAccess &&
+            permissionState.notificationPosting &&
+            (!permissionState.callScreeningAvailable || permissionState.callScreening)
+        if (state.ready && (!state.onboardingComplete || !allAvailableProtectionEnabled)) {
+            showPermissionSetup = true
+        }
+    }
+
     if (!state.ready) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
         return
     }
     if (!state.onboardingComplete) {
-        OnboardingScreen(
-            locale = state.locale,
-            permissions = permissionState,
-            onLanguage = viewModel::setLanguage,
-            onNotificationAccess = openNotificationAccess,
-            onNotificationPermission = requestNotifications,
-            onCallRole = requestCallRole,
-            onContinue = viewModel::completeOnboarding,
-        )
+        Box(Modifier.fillMaxSize()) {
+            OnboardingScreen(
+                locale = state.locale,
+                permissions = permissionState,
+                onLanguage = viewModel::setLanguage,
+                onNotificationAccess = { showPermissionSetup = true },
+                onNotificationPermission = { showPermissionSetup = true },
+                onCallRole = { showPermissionSetup = true },
+                onContinue = viewModel::completeOnboarding,
+            )
+            if (showPermissionSetup) {
+                PermissionSetupDialog(
+                    locale = state.locale,
+                    permissions = permissionState,
+                    onNotificationAccess = openNotificationAccess,
+                    onNotificationPermission = requestNotifications,
+                    onCallRole = requestCallRole,
+                    onDismiss = { showPermissionSetup = false },
+                )
+            }
+        }
         return
     }
 
@@ -203,14 +228,24 @@ fun SageSenseApp(
         state = state,
         agentState = agentState,
         permissions = permissionState,
-        onNotificationAccess = openNotificationAccess,
-        onNotificationPermission = requestNotifications,
-        onCallRole = requestCallRole,
+        onNotificationAccess = { showPermissionSetup = true },
+        onNotificationPermission = { showPermissionSetup = true },
+        onCallRole = { showPermissionSetup = true },
         onLanguage = viewModel::setLanguage,
         onClearHistory = viewModel::clearHistory,
         onAskAgent = viewModel::askAgent,
         onResetAgent = viewModel::resetAgent,
     )
+    if (showPermissionSetup) {
+        PermissionSetupDialog(
+            locale = state.locale,
+            permissions = permissionState,
+            onNotificationAccess = openNotificationAccess,
+            onNotificationPermission = requestNotifications,
+            onCallRole = requestCallRole,
+            onDismiss = { showPermissionSetup = false },
+        )
+    }
 }
 
 private fun Context.readPermissionState(): PermissionState {
@@ -221,6 +256,121 @@ private fun Context.readPermissionState(): PermissionState {
     val available = Build.VERSION.SDK_INT >= 29 && roleManager?.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) == true
     val held = available && roleManager?.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) == true
     return PermissionState(notificationAccess, notificationPosting, held, available)
+}
+
+@Composable
+private fun PermissionSetupDialog(
+    locale: String,
+    permissions: PermissionState,
+    onNotificationAccess: () -> Unit,
+    onNotificationPermission: () -> Unit,
+    onCallRole: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val total = if (permissions.callScreeningAvailable) 3 else 2
+    val enabled = listOf(
+        permissions.notificationAccess,
+        permissions.notificationPosting,
+        permissions.callScreeningAvailable && permissions.callScreening,
+    ).take(total).count { it }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Default.Shield, null, tint = SageNavy, modifier = Modifier.size(42.dp)) },
+        title = { Text(l(locale, "Set up protection", "设置防诈保护")) },
+        text = {
+            Column(
+                modifier = Modifier.heightIn(max = 560.dp).verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    l(
+                        locale,
+                        "$enabled of $total protections are enabled. Choose each item below to approve it in Android.",
+                        "已开启 $enabled/$total 项保护。请逐项点击，并在 Android 系统页面中确认授权。",
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                PermissionDialogRow(
+                    title = l(locale, "Read message notifications", "读取消息通知"),
+                    description = l(locale, "Checks supported notifications locally for scam signals.", "在手机本地检查受支持的通知是否包含诈骗信号。"),
+                    granted = permissions.notificationAccess,
+                    locale = locale,
+                    onClick = onNotificationAccess,
+                )
+                PermissionDialogRow(
+                    title = l(locale, "Show risk warnings", "显示风险警告"),
+                    description = l(locale, "Lets SageSense display a warning when it detects risk.", "发现风险时，允许 SageSense 显示警告通知。"),
+                    granted = permissions.notificationPosting,
+                    locale = locale,
+                    onClick = onNotificationPermission,
+                )
+                if (permissions.callScreeningAvailable) {
+                    PermissionDialogRow(
+                        title = l(locale, "Warn about incoming calls", "来电风险警告"),
+                        description = l(locale, "Calls keep ringing; SageSense only checks the number and warns you.", "电话仍会继续响铃；SageSense 只检查号码并发出警告。"),
+                        granted = permissions.callScreening,
+                        locale = locale,
+                        onClick = onCallRole,
+                    )
+                }
+                Text(
+                    l(
+                        locale,
+                        "Permissions are optional. Risk checks stay on this phone unless you choose to ask the Agent.",
+                        "所有权限均可选。除非你主动询问 Agent，否则风险检测数据只保留在手机上。",
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text(if (enabled == total) l(locale, "Done", "完成") else l(locale, "Continue", "继续使用"))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(l(locale, "Set up later", "稍后设置")) }
+        },
+    )
+}
+
+@Composable
+private fun PermissionDialogRow(
+    title: String,
+    description: String,
+    granted: Boolean,
+    locale: String,
+    onClick: () -> Unit,
+) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = if (granted) Color(0xFFE7F6ED) else SageSky),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    if (granted) Icons.Default.CheckCircle else Icons.Default.Warning,
+                    null,
+                    tint = if (granted) SageGreen else SageAmber,
+                    modifier = Modifier.size(26.dp),
+                )
+                Text(title, modifier = Modifier.weight(1f).padding(start = 9.dp), fontWeight = FontWeight.Bold)
+                Text(
+                    if (granted) l(locale, "ON", "已开启") else l(locale, "OFF", "未开启"),
+                    color = if (granted) SageGreen else SageRed,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Text(description, style = MaterialTheme.typography.bodySmall)
+            if (!granted) {
+                OutlinedButton(onClick = onClick, modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
+                    Text(l(locale, "Allow", "去授权"))
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -305,6 +455,7 @@ private fun MainScaffold(
                     permissions = permissions,
                     onLanguage = onLanguage,
                     onNotificationAccess = onNotificationAccess,
+                    onNotificationPermission = onNotificationPermission,
                     onCallRole = onCallRole,
                     onClearHistory = onClearHistory,
                 )
@@ -886,6 +1037,7 @@ private fun SettingsScreen(
     permissions: PermissionState,
     onLanguage: (String) -> Unit,
     onNotificationAccess: () -> Unit,
+    onNotificationPermission: () -> Unit,
     onCallRole: () -> Unit,
     onClearHistory: () -> Unit,
 ) {
@@ -910,6 +1062,7 @@ private fun SettingsScreen(
         item {
             Text(l(locale, "Protection access", "防护授权"), style = MaterialTheme.typography.titleLarge)
             StatusRow(Icons.Default.Notifications, l(locale, "Notification access", "通知读取权限"), permissions.notificationAccess, onNotificationAccess)
+            StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), permissions.notificationPosting, onNotificationPermission)
             if (permissions.callScreeningAvailable) {
                 StatusRow(Icons.Default.Call, l(locale, "Call screening role", "来电筛查角色"), permissions.callScreening, onCallRole)
             }
