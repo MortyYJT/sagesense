@@ -71,6 +71,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -140,6 +141,9 @@ private data class PermissionState(
 private data class BottomDestination(val route: String, val icon: @Composable () -> Unit)
 
 private fun l(locale: String, en: String, zh: String): String = if (locale == "zh-CN") zh else en
+
+@Composable
+private fun sageCardElevation() = CardDefaults.cardElevation(defaultElevation = 2.dp)
 
 @Composable
 fun SageSenseApp(
@@ -453,9 +457,10 @@ private fun PermissionDialogRow(
         colors = CardDefaults.cardColors(
             containerColor = if (granted) MaterialTheme.sageStatusColors.successContainer else MaterialTheme.colorScheme.primaryContainer,
         ),
+        elevation = sageCardElevation(),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     if (granted) Icons.Default.CheckCircle else Icons.Default.Warning,
@@ -466,7 +471,7 @@ private fun PermissionDialogRow(
                 Text(title, modifier = Modifier.weight(1f).padding(start = 9.dp), fontWeight = FontWeight.Bold)
                 Text(
                     if (granted) l(locale, "ON", "已开启") else l(locale, "OFF", "未开启"),
-                    color = if (granted) MaterialTheme.sageStatusColors.success else MaterialTheme.colorScheme.error,
+                    color = if (granted) MaterialTheme.sageStatusColors.success else MaterialTheme.sageStatusColors.warning,
                     fontWeight = FontWeight.Bold,
                 )
             }
@@ -506,6 +511,7 @@ private fun MainScaffold(
     val showBottomBar = currentRoute in destinations.map { it.route }
     Box(Modifier.fillMaxSize()) {
         Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
             bottomBar = {
                 if (showBottomBar) {
                     NavigationBar(
@@ -515,6 +521,7 @@ private fun MainScaffold(
                         destinations.forEach { destination ->
                             NavigationBarItem(
                                 selected = currentRoute == destination.route,
+                                alwaysShowLabel = true,
                                 onClick = {
                                     navController.navigate(destination.route) {
                                         popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -523,6 +530,13 @@ private fun MainScaffold(
                                     }
                                 },
                                 icon = destination.icon,
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    indicatorColor = MaterialTheme.colorScheme.surface,
+                                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                ),
                                 label = {
                                     Text(
                                         when (destination.route) {
@@ -531,7 +545,7 @@ private fun MainScaffold(
                                             "learn" -> l(state.locale, "Learn", "学习")
                                             else -> l(state.locale, "Settings", "设置")
                                         },
-                                        fontSize = 13.sp,
+                                        style = MaterialTheme.typography.labelMedium,
                                     )
                                 },
                             )
@@ -722,6 +736,7 @@ private fun PermissionCard(
         colors = CardDefaults.cardColors(
             containerColor = if (granted) MaterialTheme.sageStatusColors.successContainer else MaterialTheme.colorScheme.primaryContainer,
         ),
+        elevation = sageCardElevation(),
     ) {
         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -762,7 +777,11 @@ private fun HomeScreen(
             Text(l(locale, "Protection you can understand", "看得懂的防诈保护"), style = MaterialTheme.typography.titleMedium)
         }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = sageCardElevation(),
+                shape = MaterialTheme.shapes.large,
+            ) {
                 Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     EyeShieldMascot(112.dp)
                     Text(
@@ -829,8 +848,9 @@ private fun StatusRow(icon: androidx.compose.ui.graphics.vector.ImageVector, tit
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable(onClick = onClick),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = sageCardElevation(),
     ) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 icon,
                 null,
@@ -840,7 +860,7 @@ private fun StatusRow(icon: androidx.compose.ui.graphics.vector.ImageVector, tit
             Text(title, modifier = Modifier.weight(1f).padding(horizontal = 12.dp), style = MaterialTheme.typography.bodyLarge)
             Text(
                 if (enabled) "ON" else "OFF",
-                color = if (enabled) MaterialTheme.sageStatusColors.success else MaterialTheme.colorScheme.error,
+                color = if (enabled) MaterialTheme.sageStatusColors.success else MaterialTheme.sageStatusColors.warning,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -905,7 +925,7 @@ private fun WatchlistPanel(items: List<WatchlistEntity>, locale: String) {
             )
         }
         items(items, key = { it.id }) { item ->
-            Card {
+            Card(elevation = sageCardElevation()) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -964,7 +984,11 @@ private fun EventDetailScreen(
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { BackHeader(l(locale, "Risk detail", "风险详情"), onBack) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = riskColour(event.riskLevel))) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = riskColour(event.riskLevel)),
+                elevation = sageCardElevation(),
+                shape = MaterialTheme.shapes.large,
+            ) {
                 Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Default.Warning, null, tint = riskOnColour(event.riskLevel), modifier = Modifier.size(46.dp))
                     Text(
@@ -978,7 +1002,7 @@ private fun EventDetailScreen(
         }
         item {
             Text(l(locale, "What SageSense saw", "SageSense 发现了什么"), style = MaterialTheme.typography.titleLarge)
-            Card {
+            Card(elevation = sageCardElevation()) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(event.displaySender ?: l(locale, "Unknown sender", "未知发送方"), style = MaterialTheme.typography.titleMedium)
                     Text(event.redactedSnippet, style = MaterialTheme.typography.bodyLarge)
@@ -995,7 +1019,10 @@ private fun EventDetailScreen(
         }
         if (related.isNotEmpty()) {
             item {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    elevation = sageCardElevation(),
+                ) {
                     Column(Modifier.padding(18.dp)) {
                         Text(
                             l(locale, "Personal Scam Memory", "个人诈骗记忆"),
@@ -1048,7 +1075,10 @@ private fun AgentScreen(
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { BackHeader(l(locale, "Ask SageSense", "询问 SageSense"), onBack) }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = sageCardElevation(),
+            ) {
                 Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
                     EyeShieldMascot(64.dp)
                     Column(Modifier.padding(start = 12.dp)) {
@@ -1093,7 +1123,10 @@ private fun AgentScreen(
             AgentUiState.Idle -> item { EmptyCard(l(locale, "The Agent only receives redacted context after you press the button.", "只有点击按钮后，Agent 才会收到脱敏后的上下文。")) }
             AgentUiState.Loading -> item { Text(l(locale, "Checking trusted sources…", "正在查询可信来源……"), style = MaterialTheme.typography.bodyLarge) }
             is AgentUiState.Error -> item {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                    elevation = sageCardElevation(),
+                ) {
                     Column(Modifier.padding(18.dp)) {
                         Text(agentState.message, style = MaterialTheme.typography.bodyLarge)
                         TextButton(onClick = onReset) { Text(l(locale, "Dismiss", "关闭")) }
@@ -1102,7 +1135,7 @@ private fun AgentScreen(
             }
             is AgentUiState.Success -> {
                 item {
-                    Card {
+                    Card(elevation = sageCardElevation()) {
                         Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Info, null, tint = MaterialTheme.colorScheme.primary)
@@ -1126,8 +1159,11 @@ private fun AgentScreen(
                 item {
                     Text(l(locale, "Sources", "资料来源"), style = MaterialTheme.typography.titleLarge)
                     agentState.answer.citations.forEach { citation ->
-                        Card(Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { uriHandler.openUri(citation.url) }) {
-                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Card(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { uriHandler.openUri(citation.url) },
+                            elevation = sageCardElevation(),
+                        ) {
+                            Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Column(Modifier.weight(1f)) {
                                     Text(citation.title, style = MaterialTheme.typography.titleMedium)
                                     Text(citation.publisher, style = MaterialTheme.typography.bodyMedium)
@@ -1191,7 +1227,10 @@ private fun LearnScreen(locale: String) {
             Text(l(locale, "Short lessons from official sources", "来自官方来源的简短知识"), style = MaterialTheme.typography.bodyLarge)
         }
         items(cards, key = { it.id }) { card ->
-            Card(Modifier.fillMaxWidth().clickable { uriHandler.openUri(card.sourceUrl) }) {
+            Card(
+                modifier = Modifier.fillMaxWidth().clickable { uriHandler.openUri(card.sourceUrl) },
+                elevation = sageCardElevation(),
+            ) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Icon(Icons.Default.School, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(34.dp))
                     Text(if (locale == "zh-CN") card.titleZh else card.titleEn, style = MaterialTheme.typography.titleLarge)
@@ -1229,7 +1268,7 @@ private fun SettingsScreen(
     LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { Text(l(locale, "Settings & privacy", "设置与隐私"), style = MaterialTheme.typography.headlineMedium) }
         item {
-            Card {
+            Card(elevation = sageCardElevation()) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Language, null, tint = MaterialTheme.colorScheme.primary)
@@ -1247,6 +1286,7 @@ private fun SettingsScreen(
             Card(
                 modifier = Modifier.fillMaxWidth().clickable(onClick = onFaq),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = sageCardElevation(),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp).padding(18.dp),
@@ -1266,7 +1306,7 @@ private fun SettingsScreen(
         }
         item {
             Text(l(locale, "Appearance", "外观模式"), style = MaterialTheme.typography.titleLarge)
-            Card {
+            Card(elevation = sageCardElevation()) {
                 Column(Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 10.dp),
@@ -1309,7 +1349,10 @@ private fun SettingsScreen(
             }
         }
         item {
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = sageCardElevation(),
+            ) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     Text(
                         l(locale, "Privacy by default", "默认保护隐私"),
@@ -1332,7 +1375,7 @@ private fun SettingsScreen(
             }
         }
         item {
-            Card {
+            Card(elevation = sageCardElevation()) {
                 Column(Modifier.padding(18.dp)) {
                     Text(l(locale, "Agent service", "Agent 服务"), style = MaterialTheme.typography.titleMedium)
                     Text("DeepSeek V4 Flash · server-side key · 10 s timeout", style = MaterialTheme.typography.bodyMedium)
@@ -1375,7 +1418,10 @@ private fun EvidenceRow(text: String) {
 
 @Composable
 private fun EmptyCard(text: String) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        elevation = sageCardElevation(),
+    ) {
         Text(text, modifier = Modifier.fillMaxWidth().padding(20.dp), style = MaterialTheme.typography.bodyLarge)
     }
 }

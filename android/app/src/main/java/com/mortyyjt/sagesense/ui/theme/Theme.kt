@@ -3,7 +3,10 @@ package com.mortyyjt.sagesense.ui.theme
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
@@ -17,8 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 
@@ -124,13 +127,29 @@ val MaterialTheme.sageStatusColors: SageStatusColors
     @Composable get() = LocalSageStatusColors.current
 
 private val SageTypography = Typography(
-    displaySmall = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold),
-    headlineMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold),
-    titleLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 23.sp, lineHeight = 29.sp, fontWeight = FontWeight.Bold),
-    titleMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
-    bodyLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 19.sp, lineHeight = 27.sp),
-    bodyMedium = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 17.sp, lineHeight = 24.sp),
-    labelLarge = TextStyle(fontFamily = FontFamily.SansSerif, fontSize = 18.sp, lineHeight = 22.sp, fontWeight = FontWeight.SemiBold),
+    displayLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 48.sp, lineHeight = 56.sp, fontWeight = FontWeight.Bold),
+    displayMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 40.sp, lineHeight = 48.sp, fontWeight = FontWeight.Bold),
+    displaySmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 34.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold),
+    headlineLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 32.sp, lineHeight = 40.sp, fontWeight = FontWeight.Bold),
+    headlineMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.Bold),
+    headlineSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 24.sp, lineHeight = 30.sp, fontWeight = FontWeight.Bold),
+    titleLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 23.sp, lineHeight = 29.sp, fontWeight = FontWeight.Bold),
+    titleMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.SemiBold),
+    titleSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.SemiBold),
+    bodyLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 19.sp, lineHeight = 27.sp),
+    bodyMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 17.sp, lineHeight = 24.sp),
+    bodySmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 15.sp, lineHeight = 22.sp),
+    labelLarge = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 18.sp, lineHeight = 24.sp, fontWeight = FontWeight.Bold),
+    labelMedium = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 16.sp, lineHeight = 22.sp, fontWeight = FontWeight.Bold),
+    labelSmall = TextStyle(fontFamily = AtkinsonHyperlegible, fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold),
+)
+
+private val SageShapes = Shapes(
+    extraSmall = RoundedCornerShape(12.dp),
+    small = RoundedCornerShape(16.dp),
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(24.dp),
+    extraLarge = RoundedCornerShape(28.dp),
 )
 
 @Composable
@@ -154,8 +173,14 @@ fun SageSenseTheme(
     CompositionLocalProvider(
         LocalSageStatusColors provides if (darkTheme) DarkStatusColors else LightStatusColors,
     ) {
-        MaterialTheme(colorScheme = if (darkTheme) SageDarkColors else SageLightColors, typography = SageTypography) {
-            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background, content = content)
+        MaterialTheme(
+            colorScheme = if (darkTheme) SageDarkColors else SageLightColors,
+            typography = SageTypography,
+            shapes = SageShapes,
+        ) {
+            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+                ProvideTextStyle(value = MaterialTheme.typography.bodyLarge, content = content)
+            }
         }
     }
 }
