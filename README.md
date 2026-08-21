@@ -63,11 +63,13 @@ cd android
 ./gradlew testDebugUnitTest lintDebug assembleDebug
 ```
 
-The emulator default backend URL is `http://10.0.2.2:8000/`. For a physical phone, provide the computer's LAN URL:
+The default demo backend is `https://sagesense.vercel.app/`. To use a backend running on the development computer, override the URL explicitly. The Android emulator reaches the host at `10.0.2.2`:
 
 ```bash
-./gradlew assembleDebug -PSAGESENSE_API_BASE_URL=http://192.168.1.20:8000/
+./gradlew assembleDebug -PSAGESENSE_API_BASE_URL=http://10.0.2.2:8000/
 ```
+
+For a physical phone using a local backend, replace `10.0.2.2` with the computer's LAN address. Keep the default production URL for the competition demo.
 
 Install `android/app/build/outputs/apk/debug/app-debug.apk`, then grant notification access in the onboarding screen. On Android 10+, optionally grant the call-screening role. Calls are always allowed to continue ringing.
 
