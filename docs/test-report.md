@@ -12,7 +12,9 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 |---|---|---|
 | Backend | `.venv/bin/pytest -q backend/tests` | Pass: 31 tests, 0 failures |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
+| GitHub CI | [CI run 16](https://github.com/MortyYJT/sagesense/actions/runs/32497129302) for release code/docs at `20a4e29` | Pass: backend and Android jobs completed successfully |
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
+| Production privacy boundary | Health headers plus a synthetic invalid-locale request after deployment | Pass: `no-store`, `no-referrer`, `nosniff`, frame/permissions headers; stable 422 did not echo the marker |
 | Android JVM | `./gradlew testDebugUnitTest` | Pass: 42 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
 | Android APK | `./gradlew assembleDebug` | Pass: 21,454,010 bytes |
@@ -24,6 +26,8 @@ SHA-256: `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.
+The deployed health response reports the configured `deepseek-v4-flash` model;
+the synthetic 422 check contained no personal or production user data.
 
 ## Automated coverage
 

@@ -4,6 +4,10 @@
 
 - [x] Backend tests pass on Python 3.12 (31 tests, 2026-08-22).
 - [x] Production Agent returns `degraded=false` through OpenCode Go without exposing its key.
+- [x] Production FastAPI returns the privacy/security headers and a non-echoing
+  validation error verified after deployment.
+- [x] GitHub CI run 16 passed both backend and Android jobs for release code/docs
+  at `20a4e29`.
 - [x] Current Android main source compiles and 42 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
 - [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,454,010 bytes with SHA-256 `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`.
 - [x] Emulator verifies overlay grant/deny/revoke, preview, auto-hide, tap-through, notification channel v4, manual check, two-event Scam Memory and Agent online/offline.
