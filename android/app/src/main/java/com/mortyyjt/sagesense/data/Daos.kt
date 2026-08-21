@@ -43,4 +43,7 @@ interface WatchlistDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(items: List<WatchlistEntity>)
+
+    @Query("DELETE FROM watchlist WHERE id = :id")
+    suspend fun deleteById(id: String)
 }

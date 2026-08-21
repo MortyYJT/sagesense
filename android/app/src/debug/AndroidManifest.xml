@@ -4,5 +4,19 @@
 
     <application
         android:usesCleartextTraffic="true"
-        tools:replace="android:usesCleartextTraffic" />
+        tools:replace="android:usesCleartextTraffic">
+
+        <!-- Debug-only QA hook. Only the Android shell/system can invoke it
+             because ordinary apps do not hold the signature DUMP permission. -->
+        <receiver
+            android:name=".debug.DebugWatchlistFixtureReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="android.permission.DUMP">
+            <intent-filter>
+                <action android:name="com.mortyyjt.sagesense.debug.ADD_TEMPORARY_CALLER" />
+                <action android:name="com.mortyyjt.sagesense.debug.REMOVE_TEMPORARY_CALLER" />
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>
