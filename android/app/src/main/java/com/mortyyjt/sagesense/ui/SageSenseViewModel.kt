@@ -7,6 +7,8 @@ import com.mortyyjt.sagesense.AppContainer
 import com.mortyyjt.sagesense.data.RiskEventEntity
 import com.mortyyjt.sagesense.data.WatchlistEntity
 import com.mortyyjt.sagesense.network.AgentAnswer
+import com.mortyyjt.sagesense.network.agentFailureMessage
+import com.mortyyjt.sagesense.network.mapAgentFailure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -73,15 +75,7 @@ class SageSenseViewModel(private val container: AppContainer) : ViewModel() {
             )
             _agentState.value = result.fold(
                 onSuccess = { AgentUiState.Success(it) },
-                onFailure = {
-                    AgentUiState.Error(
-                        if (state.locale == "zh-CN") {
-                            "无法连接 Agent。风险判断仍在本机完成，请稍后再试。"
-                        } else {
-                            "The advisor could not be reached. Local risk detection is still working. Please try again."
-                        },
-                    )
-                },
+                onFailure = { AgentUiState.Error(agentFailureMessage(mapAgentFailure(it), state.locale)) },
             )
         }
     }
