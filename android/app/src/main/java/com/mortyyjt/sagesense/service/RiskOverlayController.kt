@@ -89,9 +89,9 @@ object RiskOverlayController {
             view.contentDescription = presentation.contentDescription
             icon.setImageResource(
                 if (presentation.kind == RiskOverlayKind.MEDIUM) {
-                    android.R.drawable.ic_dialog_alert
+                    R.drawable.ic_overlay_warning
                 } else {
-                    R.drawable.ic_launcher
+                    R.drawable.ic_overlay_shield
                 },
             )
             icon.setColorFilter(iconTint)
