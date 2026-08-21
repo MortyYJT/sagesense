@@ -122,8 +122,8 @@ emulator passed fresh-install, permission no-repeat, real Google Messages,
 ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
 online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 
-The current debug APK is 21,453,574 bytes with SHA-256
-`ad14c8b03ff6c90da37bbebbc395339296d02c8c8ea0b91260d95404ef650ec6`.
+The current debug APK is 21,453,951 bytes with SHA-256
+`f6da806c580ea2d8b4fb1978774f0d70e3d8ea34538b72aee0a522190d288a0c`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
 15-second client deadline and never contain a provider key. See the
 [test report](docs/test-report.md) for the evidence boundary and the still-

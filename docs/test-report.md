@@ -15,12 +15,12 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
 | Android JVM | `./gradlew testDebugUnitTest` | Pass: 32 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
-| Android APK | `./gradlew assembleDebug` | Pass: 21,453,574 bytes |
+| Android APK | `./gradlew assembleDebug` | Pass: 21,453,951 bytes |
 | Static integrity | `git diff --check`, JSON/XML parsing, `unzip -t` | Pass |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `ad14c8b03ff6c90da37bbebbc395339296d02c8c8ea0b91260d95404ef650ec6`
+SHA-256: `f6da806c580ea2d8b4fb1978774f0d70e3d8ea34538b72aee0a522190d288a0c`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.
@@ -57,6 +57,7 @@ Device: `SageSense_API_37`, `sdk_gphone64_arm64`, Android 17 / API 37.
 | Risk overlay deep link | A 20-second red shield appeared for a high-risk event; tapping it opened the matching bilingual Cognitive Pause | Pass |
 | Overlay privacy boundary | Manifest/source audit contains no `AccessibilityService`, screen capture, OCR, full-screen intent or automatic blocking path | Pass source audit |
 | Real Google Messages path | Emulator SMS generated a Google Messages notification; SageSense stored one non-demo 100/100 event and showed the system overlay | Pass |
+| Post-merge install smoke | Rebuilt APK installed over the emulator build; a new real SMS showed the merged vector shield and tapping it opened the matching Cognitive Pause | Pass |
 | Notification de-duplication | Two identical Google Messages updates one second apart produced one additional event, not two | Pass |
 | Notification self-loop | SageSense output notifications did not re-enter the risk history | Pass |
 | Channel policy | Message v4 is importance 4 with default sound and `[0,250]` vibration; call v4 is importance 4 with no notification sound and `[0,250]`; demo v2 has neither | Pass system state |

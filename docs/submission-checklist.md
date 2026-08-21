@@ -5,7 +5,7 @@
 - [x] Backend tests pass on Python 3.12 (22 tests, 2026-08-22).
 - [x] Production Agent returns `degraded=false` through OpenCode Go without exposing its key.
 - [x] Current Android main source compiles and 32 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
-- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,453,574 bytes with SHA-256 `ad14c8b03ff6c90da37bbebbc395339296d02c8c8ea0b91260d95404ef650ec6`.
+- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,453,951 bytes with SHA-256 `f6da806c580ea2d8b4fb1978774f0d70e3d8ea34538b72aee0a522190d288a0c`.
 - [x] Emulator verifies overlay grant/deny/revoke, preview, auto-hide, tap-through, notification channel v4, manual check, two-event Scam Memory and Agent online/offline.
 - [ ] Fresh-install physical-device smoke test passes.
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.
