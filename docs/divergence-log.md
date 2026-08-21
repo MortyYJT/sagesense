@@ -34,3 +34,10 @@ context (with phone values masked and sender identity omitted), and treats
 Personal Scam Memory as a conservative local similarity hint rather than a fraud
 determination. Notification channels are versioned to `v4` to avoid inheriting an
 older channel's user-muted configuration.
+
+Physical call acceptance uses an ADB-only temporary caller fixture in debug
+builds because a normal second phone cannot safely spoof the fixed seeded number.
+The component requires Android's signature-level `DUMP` permission, accepts only
+phone-shaped input, masks its display value and can remove only its derived test
+entry. It is absent from release builds and is not a dynamic threat feed or a
+user-facing Watchlist editor.

@@ -61,7 +61,7 @@ no-match query produces no citations rather than unrelated sources.
 - `knowledge/` — curated bilingual summaries with source metadata.
 - `docs/` — PRD, design divergence, testing, video, and submission material.
 
-Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), [current test report](docs/test-report.md), and [product-readiness audit](docs/product-readiness-audit.md).
+Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), [current test report](docs/test-report.md), [product-readiness audit](docs/product-readiness-audit.md), [physical-device runbook](docs/device-acceptance-runbook.md), and [Devpost draft](docs/devpost-draft.md).
 
 ## Run the backend
 
@@ -115,21 +115,39 @@ bubble. Notification channels were versioned to `v4` so the intended sound and
 vibration policy can take effect on installs that previously used an incompatible
 channel configuration.
 
-Current release-candidate evidence: 32 Android JVM tests and 22 backend tests
+Current release-candidate evidence: 35 Android JVM tests and 22 backend tests
 pass; Android lint reports 0 errors and 7 dependency/version-availability
 warnings; the production Agent returned `degraded=false`; and an Android 17
 emulator passed fresh-install, permission no-repeat, real Google Messages,
 ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
 online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 
-The current debug APK is 21,453,951 bytes with SHA-256
-`f6da806c580ea2d8b4fb1978774f0d70e3d8ea34538b72aee0a522190d288a0c`.
+The current debug APK is 21,454,010 bytes with SHA-256
+`700562c24036fb906dfd3326701bc055eca8c7243dd80a4169179b5f82903af6`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
 15-second client deadline and never contain a provider key. See the
 [test report](docs/test-report.md) for the evidence boundary and the still-
 Pending physical-device gate.
 
 The seeded phone number `+61 400 000 999` and `.example` domain are presentation fixtures, not claims about real entities.
+
+To create a source-only ZIP plus a clearly named RC APK from committed `HEAD`,
+while rejecting secrets, local configuration, APKs inside the source archive and
+the supplied Sixth Sense PDF/FIG, run:
+
+```bash
+./scripts/build_submission_bundle.sh
+```
+
+Generated files and checksums are written to ignored `dist/`; they are release
+artifacts, not source-control inputs.
+
+For physical call-screening QA, the debug variant includes an ADB-only temporary
+caller fixture protected by Android's signature-level `DUMP` permission. It lets
+the Android shell add and remove a second test phone's number without hardcoding
+personal data, changing the Room schema or exposing a product UI. It is absent
+from release builds. Follow the exact commands in the
+[physical-device runbook](docs/device-acceptance-runbook.md).
 
 ## Privacy and safety
 

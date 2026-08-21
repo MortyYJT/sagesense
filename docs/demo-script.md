@@ -18,7 +18,13 @@ Send the seeded demo a second time, then open history and the selected event. Sh
 
 ## 2:35–3:10 — Call warning
 
-Call the device from the seeded number `+61 400 000 999`, or use a labelled prerecorded real-device clip if carrier setup is unavailable. The phone must continue ringing while the SageSense warning appears.
+For a physical debug recording, use the ADB-only temporary caller fixture in
+`device-acceptance-runbook.md`, then call from that real second phone and remove
+the fixture immediately after recording. If a second phone is unavailable, use
+the fixed `+61 400 000 999` emulator fixture and label the clip `Seeded demo data
+· simulated incoming call`. In either case, the phone must continue ringing
+while the SageSense warning appears; never imply that a simulated caller is a
+live threat-intelligence match.
 
 ## 3:10–3:40 — Learn, bilingual, accessibility
 

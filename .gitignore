@@ -22,6 +22,8 @@ __pycache__/
 captures/
 .idea/
 *.iml
+*.apk
+dist/
 
 # macOS and local working material
 .DS_Store

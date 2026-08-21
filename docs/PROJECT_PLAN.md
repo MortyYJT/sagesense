@@ -1,6 +1,6 @@
 # SageSense delivery plan
 
-Last updated: Saturday, 22 August 2026, 00:03 AEST
+Last updated: Saturday, 22 August 2026, 00:54 AEST
 
 Release status: the current release-hardening tree has an installable debug RC.
 Backend, production-Agent, Android JVM, lint, build and isolated-emulator gates
@@ -25,7 +25,7 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 
 ### Complete locally
 
-- Android project has a current 21,453,951-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `f6da806c580ea2d8b4fb1978774f0d70e3d8ea34538b72aee0a522190d288a0c`.
+- Android project has a current 21,454,010-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `700562c24036fb906dfd3326701bc055eca8c7243dd80a4169179b5f82903af6`.
 - Notification listener, call-screening service, local risk engine, Watchlist, Personal Scam Memory and deep-linked alerts are implemented.
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
@@ -38,9 +38,13 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - The prototype has a process-local best-effort limiter of 8 requests/minute and 2 concurrent requests per client; durable multi-instance enforcement remains a Vercel WAF responsibility.
 - Curated knowledge retrieval now uses weighted bilingual lexical matching with stable ordering; no-match queries return no citations. No vector database is intentionally in scope for this small curated corpus.
 - Backend tests pass on the current tree: 22. Android `testDebugUnitTest` passes
-  32 tests; `lintDebug` reports 0 errors and 7 non-blocking dependency/version
+  35 tests; `lintDebug` reports 0 errors and 7 non-blocking dependency/version
   availability warnings; `assembleDebug` succeeds. This automated and emulator
   evidence is not a substitute for the still-Pending physical-device gate.
+- A debug-only, Android `DUMP`-permission-protected ADB hook can add and remove a
+  masked temporary second-phone fixture for physical call QA. Add → ringing call
+  → warning and remove → no new event passed on the emulator; the generated
+  release manifest contains no receiver for this hook.
 
 ### Still required
 

@@ -13,14 +13,14 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 | Backend | `.venv/bin/pytest -q backend/tests` | Pass: 22 tests, 0 failures |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
-| Android JVM | `./gradlew testDebugUnitTest` | Pass: 32 tests, 0 failures/errors/skips |
+| Android JVM | `./gradlew testDebugUnitTest` | Pass: 35 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
-| Android APK | `./gradlew assembleDebug` | Pass: 21,453,951 bytes |
+| Android APK | `./gradlew assembleDebug` | Pass: 21,454,010 bytes |
 | Static integrity | `git diff --check`, JSON/XML parsing, `unzip -t` | Pass |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `f6da806c580ea2d8b4fb1978774f0d70e3d8ea34538b72aee0a522190d288a0c`
+SHA-256: `700562c24036fb906dfd3326701bc055eca8c7243dd80a4169179b5f82903af6`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.
@@ -39,6 +39,9 @@ The generated APK targets the production demo backend at
 - Event-only overlay policy, duration and accessibility copy.
 - Notification de-duplication, 30-day retention and conservative Personal Scam
   Memory matching.
+- Temporary physical-call fixture validation: accepted phone shapes, stable
+  canonical IDs, masked display values, duplicate replacement and invalid-input
+  rejection.
 - Theme parsing and the invariant that every app typography style is at least
   22sp.
 
@@ -63,6 +66,8 @@ Device: `SageSense_API_37`, `sdk_gphone64_arm64`, Android 17 / API 37.
 | Channel policy | Message v4 is importance 4 with default sound and `[0,250]` vibration; call v4 is importance 4 with no notification sound and `[0,250]`; demo v2 has neither | Pass system state |
 | Seeded demo | Notification has `SILENT`, `sound=null`, `vibrate=null`, a demo label and a deep link | Pass |
 | Watchlist call | `0400000999` matched the `+61 400 000 999` fixture, stored a 60/100 high-risk call event, and `dumpsys telecom` remained `RINGING` | Pass |
+| Temporary physical-call fixture | A DUMP-protected debug broadcast added masked `61411222333`; `0411222333` remained `RINGING`, produced one 60/100 high-risk event and overlay; after removal the same call produced no new event | Pass |
+| Debug/release separation | Debug merged manifest contains the ADB receiver; `processReleaseMainManifest` completed and the release merged manifest contains zero receiver entries | Pass |
 | Call overlay and copy | Red shield appeared over the ringing call; tap opened Cognitive Pause with `Call not blocked` / `电话未被拦截` | Pass |
 | Manual local check | A pasted risky message produced the local Cognitive Pause and history event without an Agent request | Pass |
 | Personal Scam Memory | Two labelled demo messages with changed sender/domain were related by multiple stable risk signals | Pass |
