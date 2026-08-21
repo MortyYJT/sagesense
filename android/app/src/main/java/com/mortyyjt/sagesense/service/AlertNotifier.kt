@@ -16,11 +16,12 @@ import androidx.core.net.toUri
 import com.mortyyjt.sagesense.MainActivity
 import com.mortyyjt.sagesense.R
 import com.mortyyjt.sagesense.data.RiskEventEntity
+import com.mortyyjt.sagesense.risk.RiskLevel
 
 object AlertNotifier {
-    const val MESSAGE_RISK_CHANNEL = "sagesense_message_risk_v2"
-    const val CALL_RISK_CHANNEL = "sagesense_call_risk_v2"
-    const val DEMO_CHANNEL = "sagesense_demo_inputs"
+    const val MESSAGE_RISK_CHANNEL = "sagesense_message_risk_v3"
+    const val CALL_RISK_CHANNEL = "sagesense_call_risk_v3"
+    const val DEMO_CHANNEL = "sagesense_demo_inputs_v2"
     internal const val RISK_OUTPUT_EXTRA = "com.mortyyjt.sagesense.extra.RISK_OUTPUT"
 
     internal fun isSageSenseRiskChannel(channelId: String?): Boolean =
@@ -29,17 +30,16 @@ object AlertNotifier {
     fun createChannels(context: Context) {
         val manager = context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
-            NotificationChannel(MESSAGE_RISK_CHANNEL, "Message risk warnings", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Visible warnings for suspicious message notifications"
-                enableVibration(true)
-                vibrationPattern = longArrayOf(0, 250)
+            NotificationChannel(MESSAGE_RISK_CHANNEL, "Message risk warnings", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Silent status-bar entries for suspicious message notifications"
+                enableVibration(false)
+                setSound(null, null)
             },
         )
         manager.createNotificationChannel(
-            NotificationChannel(CALL_RISK_CHANNEL, "Call risk warnings", NotificationManager.IMPORTANCE_HIGH).apply {
-                description = "Visible warnings for numbers on the local Risk Watchlist"
-                enableVibration(true)
-                vibrationPattern = longArrayOf(0, 250)
+            NotificationChannel(CALL_RISK_CHANNEL, "Call risk warnings", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Silent status-bar entries for local Risk Watchlist matches"
+                enableVibration(false)
                 setSound(null, null)
             },
         )
@@ -53,8 +53,9 @@ object AlertNotifier {
     }
 
     fun showRisk(context: Context, event: RiskEventEntity, titleOverride: String? = null, locale: String = "en-AU") {
+        if (event.riskLevel == RiskLevel.LOW) return
+        RiskOverlayController.showRisk(context, event)
         if (!canPost(context)) return
-        val isDemo = alertChannelKind(event) == AlertChannelKind.SEEDED_DEMO
         val channelId = when (alertChannelKind(event)) {
             AlertChannelKind.MESSAGE_RISK -> MESSAGE_RISK_CHANNEL
             AlertChannelKind.CALL_RISK -> CALL_RISK_CHANNEL
@@ -76,12 +77,10 @@ object AlertNotifier {
             .setContentTitle(titleOverride ?: copy.title)
             .setContentText(copy.body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(copy.body))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setOnlyAlertOnce(true)
-            // Call alerts use a channel with no notification sound but one vibration.
-            // Seeded demo alerts are the only completely silent risk output.
-            .setSilent(isDemo)
+            .setSilent(true)
             .addExtras(Bundle().apply { putBoolean(RISK_OUTPUT_EXTRA, true) })
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
@@ -100,7 +99,7 @@ object AlertNotifier {
                     "SEEDED DEMO — URGENT: Your account will be suspended. Verify your password now: https://commbank-secure-login.example",
                 ),
             )
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setOnlyAlertOnce(true)
             .setSilent(true)
             .setAutoCancel(true)

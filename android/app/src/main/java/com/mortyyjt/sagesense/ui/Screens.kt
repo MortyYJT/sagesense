@@ -125,6 +125,7 @@ import com.mortyyjt.sagesense.data.RiskEventEntity
 import com.mortyyjt.sagesense.data.WatchlistEntity
 import com.mortyyjt.sagesense.risk.RiskLevel
 import com.mortyyjt.sagesense.service.AlertNotifier
+import com.mortyyjt.sagesense.service.RiskOverlayController
 import com.mortyyjt.sagesense.service.SageNotificationListenerService
 import com.mortyyjt.sagesense.ui.theme.ThemeMode
 import com.mortyyjt.sagesense.ui.theme.sageStatusColors
@@ -134,6 +135,7 @@ import java.util.Date
 private data class PermissionState(
     val notificationAccess: Boolean,
     val notificationPosting: Boolean,
+    val systemOverlay: Boolean,
     val callScreening: Boolean,
     val callScreeningAvailable: Boolean,
 )
@@ -149,6 +151,7 @@ private fun sageCardElevation() = CardDefaults.cardElevation(defaultElevation = 
 fun SageSenseApp(
     viewModel: SageSenseViewModel,
     initialEventId: String?,
+    initialCognitivePauseEventId: String?,
     onDeepLinkConsumed: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -160,7 +163,12 @@ fun SageSenseApp(
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, context) {
         val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) permissionState = context.readPermissionState()
+            if (event == Lifecycle.Event.ON_RESUME) {
+                permissionState = context.readPermissionState().also { updated ->
+                    if (updated.systemOverlay) RiskOverlayController.showResting(context)
+                    else RiskOverlayController.hide()
+                }
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
@@ -223,6 +231,19 @@ fun SageSenseApp(
         }
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
     }
+    val openOverlaySettings = {
+        val intent = Intent(
+            Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+            Uri.parse("package:${context.packageName}"),
+        )
+        try {
+            context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        } catch (_: Exception) {
+            context.startActivity(
+                Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            )
+        }
+    }
     val requestCallRole = {
         if (Build.VERSION.SDK_INT >= 29) {
             val roleManager = context.getSystemService(RoleManager::class.java)
@@ -262,6 +283,7 @@ fun SageSenseApp(
                 onLanguage = viewModel::setLanguage,
                 onNotificationAccess = { showPermissionSetup = true },
                 onNotificationPermission = { showPermissionSetup = true },
+                onSystemOverlay = { showPermissionSetup = true },
                 onCallRole = { showPermissionSetup = true },
                 onContinue = viewModel::completeOnboarding,
             )
@@ -272,6 +294,7 @@ fun SageSenseApp(
                     callRoleNeedsSettings = callRoleNeedsSettings,
                     onNotificationAccess = openNotificationAccess,
                     onNotificationPermission = reviewNotificationPermission,
+                    onSystemOverlay = openOverlaySettings,
                     onCallRole = reviewCallRole,
                     onDismiss = { showPermissionSetup = false },
                 )
@@ -296,6 +319,19 @@ fun SageSenseApp(
         }
     }
     val cognitivePauseEvent = state.events.firstOrNull { it.id == cognitivePauseEventId }
+    LaunchedEffect(cognitivePauseEvent?.id, permissionState.systemOverlay) {
+        if (cognitivePauseEvent != null && permissionState.systemOverlay) {
+            RiskOverlayController.hide()
+        }
+    }
+
+    LaunchedEffect(initialCognitivePauseEventId, state.events) {
+        val eventId = initialCognitivePauseEventId ?: return@LaunchedEffect
+        if (state.events.any { it.id == eventId }) {
+            cognitivePauseEventId = eventId
+            onDeepLinkConsumed()
+        }
+    }
 
     val navController = rememberNavController()
     LaunchedEffect(initialEventId, state.events) {
@@ -314,13 +350,17 @@ fun SageSenseApp(
         cognitivePauseEvent = cognitivePauseEvent,
         onNotificationAccess = { showPermissionSetup = true },
         onNotificationPermission = { showPermissionSetup = true },
+        onSystemOverlay = { showPermissionSetup = true },
         onCallRole = { showPermissionSetup = true },
         onLanguage = viewModel::setLanguage,
         onThemeMode = viewModel::setThemeMode,
         onClearHistory = viewModel::clearHistory,
         onAskAgent = viewModel::askAgent,
         onResetAgent = viewModel::resetAgent,
-        onDismissCognitivePause = { cognitivePauseEventId = null },
+        onDismissCognitivePause = {
+            cognitivePauseEventId = null
+            RiskOverlayController.showResting(context)
+        },
     )
     if (showPermissionSetup) {
         PermissionSetupDialog(
@@ -329,6 +369,7 @@ fun SageSenseApp(
             callRoleNeedsSettings = callRoleNeedsSettings,
             onNotificationAccess = openNotificationAccess,
             onNotificationPermission = reviewNotificationPermission,
+            onSystemOverlay = openOverlaySettings,
             onCallRole = reviewCallRole,
             onDismiss = { showPermissionSetup = false },
         )
@@ -345,10 +386,11 @@ private fun Context.readPermissionState(): PermissionState {
     }
     val notificationPosting = Build.VERSION.SDK_INT < 33 ||
         ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+    val systemOverlay = Settings.canDrawOverlays(this)
     val roleManager = if (Build.VERSION.SDK_INT >= 29) getSystemService(RoleManager::class.java) else null
     val available = Build.VERSION.SDK_INT >= 29 && roleManager?.isRoleAvailable(RoleManager.ROLE_CALL_SCREENING) == true
     val held = available && roleManager?.isRoleHeld(RoleManager.ROLE_CALL_SCREENING) == true
-    return PermissionState(notificationAccess, notificationPosting, held, available)
+    return PermissionState(notificationAccess, notificationPosting, systemOverlay, held, available)
 }
 
 @Composable
@@ -358,15 +400,17 @@ private fun PermissionSetupDialog(
     callRoleNeedsSettings: Boolean,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val total = if (permissions.callScreeningAvailable) 3 else 2
-    val enabled = listOf(
-        permissions.notificationAccess,
-        permissions.notificationPosting,
-        permissions.callScreeningAvailable && permissions.callScreening,
-    ).take(total).count { it }
+    val total = if (permissions.callScreeningAvailable) 4 else 3
+    val enabled = buildList {
+        add(permissions.notificationAccess)
+        add(permissions.notificationPosting)
+        add(permissions.systemOverlay)
+        if (permissions.callScreeningAvailable) add(permissions.callScreening)
+    }.count { it }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -408,6 +452,22 @@ private fun PermissionSetupDialog(
                         l(locale, "Allow", "去授权")
                     },
                     onClick = onNotificationPermission,
+                )
+                PermissionDialogRow(
+                    title = l(locale, "Show floating risk entry", "显示悬浮风险入口"),
+                    description = l(
+                        locale,
+                        "Optional. Shows one warning icon over other apps. SageSense does not read or capture the screen.",
+                        "可选。SageSense 可在其他应用上方显示一个风险图标；它不会读取或截取屏幕内容。",
+                    ),
+                    granted = permissions.systemOverlay,
+                    locale = locale,
+                    actionLabel = if (permissions.systemOverlay) {
+                        l(locale, "Review or turn off", "查看或关闭")
+                    } else {
+                        l(locale, "Open Android setting", "打开系统设置")
+                    },
+                    onClick = onSystemOverlay,
                 )
                 if (permissions.callScreeningAvailable) {
                     PermissionDialogRow(
@@ -500,6 +560,7 @@ private fun MainScaffold(
     cognitivePauseEvent: RiskEventEntity?,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onLanguage: (String) -> Unit,
     onThemeMode: (ThemeMode) -> Unit,
@@ -591,6 +652,7 @@ private fun MainScaffold(
                     permissions = permissions,
                     onNotificationAccess = onNotificationAccess,
                     onNotificationPermission = onNotificationPermission,
+                    onSystemOverlay = onSystemOverlay,
                     onCallRole = onCallRole,
                     onOpenEvent = { navController.navigate("detail/$it") },
                     onAgent = { navController.navigate("agent") },
@@ -610,6 +672,7 @@ private fun MainScaffold(
                     onThemeMode = onThemeMode,
                     onNotificationAccess = onNotificationAccess,
                     onNotificationPermission = onNotificationPermission,
+                    onSystemOverlay = onSystemOverlay,
                     onCallRole = onCallRole,
                     onClearHistory = onClearHistory,
                     onFaq = { navController.navigate("faq-safety") },
@@ -657,6 +720,7 @@ private fun MainScaffold(
             event = cognitivePauseEvent,
             locale = state.locale,
             onLanguage = onLanguage,
+            showCompanionIndicator = !permissions.systemOverlay,
             onSeeWhy = { eventId ->
                 onDismissCognitivePause()
                 navController.navigate("detail/$eventId")
@@ -673,6 +737,7 @@ private fun OnboardingScreen(
     onLanguage: (String) -> Unit,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onContinue: () -> Unit,
 ) {
@@ -724,6 +789,19 @@ private fun OnboardingScreen(
                     locale = locale,
                 )
             }
+        }
+        item {
+            PermissionCard(
+                title = l(locale, "Floating risk warning", "悬浮风险警告"),
+                description = l(
+                    locale,
+                    "Optional. Shows one warning icon over other apps and never reads the screen.",
+                    "可选。在其他应用上方显示一个风险图标，不会读取屏幕内容。",
+                ),
+                granted = permissions.systemOverlay,
+                onClick = onSystemOverlay,
+                locale = locale,
+            )
         }
         if (permissions.callScreeningAvailable) {
             item {
@@ -787,6 +865,7 @@ private fun HomeScreen(
     permissions: PermissionState,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onOpenEvent: (String) -> Unit,
     onAgent: () -> Unit,
@@ -829,6 +908,9 @@ private fun HomeScreen(
             Spacer(Modifier.height(10.dp))
             StatusRow(Icons.Default.Notifications, l(locale, "Message notifications", "消息通知"), permissions.notificationAccess, locale) {
                 onNotificationAccess()
+            }
+            StatusRow(Icons.Default.Shield, l(locale, "Floating risk warning", "悬浮风险警告"), permissions.systemOverlay, locale) {
+                onSystemOverlay()
             }
             StatusRow(Icons.Default.Call, l(locale, "Incoming call warnings", "来电风险警告"), permissions.callScreening, locale) {
                 if (permissions.callScreeningAvailable) onCallRole()
@@ -1292,6 +1374,7 @@ private fun SettingsScreen(
     onThemeMode: (ThemeMode) -> Unit,
     onNotificationAccess: () -> Unit,
     onNotificationPermission: () -> Unit,
+    onSystemOverlay: () -> Unit,
     onCallRole: () -> Unit,
     onClearHistory: () -> Unit,
     onFaq: () -> Unit,
@@ -1376,6 +1459,7 @@ private fun SettingsScreen(
             Text(l(locale, "Protection access", "防护授权"), style = MaterialTheme.typography.titleLarge)
             StatusRow(Icons.Default.Notifications, l(locale, "Notification access", "通知读取权限"), permissions.notificationAccess, locale, onNotificationAccess)
             StatusRow(Icons.Default.Warning, l(locale, "Visible warning permission", "警告显示权限"), permissions.notificationPosting, locale, onNotificationPermission)
+            StatusRow(Icons.Default.Shield, l(locale, "Floating risk warning", "悬浮风险警告"), permissions.systemOverlay, locale, onSystemOverlay)
             if (permissions.callScreeningAvailable) {
                 StatusRow(Icons.Default.Call, l(locale, "Call screening role", "来电筛查角色"), permissions.callScreening, locale, onCallRole)
             }

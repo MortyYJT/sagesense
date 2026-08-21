@@ -48,8 +48,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
@@ -61,7 +59,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.mortyyjt.sagesense.data.RiskEventEntity
+import com.mortyyjt.sagesense.risk.RiskLevel
 import com.mortyyjt.sagesense.ui.theme.AtkinsonHyperlegible
+import com.mortyyjt.sagesense.ui.theme.sageStatusColors
 import kotlinx.coroutines.delay
 
 private val PauseTitleStyle = TextStyle(
@@ -91,20 +91,30 @@ fun CognitivePauseExperience(
     onLanguage: (String) -> Unit,
     onSeeWhy: (String) -> Unit,
     onDismiss: () -> Unit,
+    showCompanionIndicator: Boolean = true,
 ) {
     val active = event != null
-    val indicatorSize by animateDpAsState(if (active) 68.dp else 46.dp, label = "Companion size")
+    val indicatorSize by animateDpAsState(
+        when (event?.riskLevel) {
+            RiskLevel.HIGH -> 80.dp
+            RiskLevel.MEDIUM -> 68.dp
+            else -> 46.dp
+        },
+        label = "Companion size",
+    )
     val indicatorColor by animateColorAsState(
-        if (active) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primaryContainer,
+        when (event?.riskLevel) {
+            RiskLevel.HIGH -> MaterialTheme.colorScheme.error
+            RiskLevel.MEDIUM -> MaterialTheme.sageStatusColors.warning
+            else -> MaterialTheme.colorScheme.primaryContainer
+        },
         label = "Companion colour",
     )
-    val hapticFeedback = LocalHapticFeedback.current
     var actionsEnabled by remember(event?.id) { mutableStateOf(false) }
 
     LaunchedEffect(event?.id) {
         actionsEnabled = false
         if (event != null) {
-            hapticFeedback.performHapticFeedback(HapticFeedbackType.Confirm)
             // Prevent the gesture that triggered the warning from clicking through
             // to an action as the overlay enters the composition.
             delay(600)
@@ -148,31 +158,37 @@ fun CognitivePauseExperience(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .statusBarsPadding()
-                .padding(top = 18.dp, end = 14.dp)
-                .zIndex(3f)
-                .size(indicatorSize)
-                .alpha(if (active) 1f else 0.42f)
-                .clip(CircleShape)
-                .background(indicatorColor)
-                .semantics {
-                    contentDescription = pauseL(
-                        locale,
-                        if (active) "SageSense risk warning" else "SageSense companion resting",
-                        if (active) "SageSense 风险警告" else "SageSense 伙伴安静守护中",
-                    )
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                if (active) Icons.Default.Warning else Icons.Default.Shield,
-                contentDescription = null,
-                tint = if (active) MaterialTheme.colorScheme.onError else MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(indicatorSize * 0.58f),
-            )
+        if (showCompanionIndicator) {
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(top = 18.dp, end = 14.dp)
+                    .zIndex(3f)
+                    .size(indicatorSize)
+                    .alpha(if (active) 1f else 0.42f)
+                    .clip(CircleShape)
+                    .background(indicatorColor)
+                    .semantics {
+                        contentDescription = pauseL(
+                            locale,
+                            if (active) "SageSense risk warning" else "SageSense companion resting",
+                            if (active) "SageSense 风险警告" else "SageSense 伙伴安静守护中",
+                        )
+                    },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (event?.riskLevel == RiskLevel.MEDIUM) Icons.Default.Warning else Icons.Default.Shield,
+                    contentDescription = null,
+                    tint = when (event?.riskLevel) {
+                        RiskLevel.HIGH -> MaterialTheme.colorScheme.onError
+                        RiskLevel.MEDIUM -> MaterialTheme.sageStatusColors.onWarning
+                        else -> MaterialTheme.colorScheme.onPrimaryContainer
+                    },
+                    modifier = Modifier.size(indicatorSize * 0.58f),
+                )
+            }
         }
     }
 }

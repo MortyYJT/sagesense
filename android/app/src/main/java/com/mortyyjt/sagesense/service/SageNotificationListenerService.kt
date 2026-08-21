@@ -14,6 +14,11 @@ import kotlinx.coroutines.launch
 class SageNotificationListenerService : NotificationListenerService() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        RiskOverlayController.showResting(this)
+    }
+
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         if (
             sbn == null ||
