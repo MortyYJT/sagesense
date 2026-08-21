@@ -12,7 +12,7 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -94,11 +94,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -118,14 +118,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.mortyyjt.sagesense.R
 import com.mortyyjt.sagesense.data.LearnCard
 import com.mortyyjt.sagesense.data.RiskEventEntity
 import com.mortyyjt.sagesense.data.WatchlistEntity
 import com.mortyyjt.sagesense.risk.RiskLevel
 import com.mortyyjt.sagesense.service.AlertNotifier
 import com.mortyyjt.sagesense.service.SageNotificationListenerService
-import com.mortyyjt.sagesense.ui.theme.SageBlue
-import com.mortyyjt.sagesense.ui.theme.SageNavy
 import com.mortyyjt.sagesense.ui.theme.ThemeMode
 import com.mortyyjt.sagesense.ui.theme.sageStatusColors
 import java.text.DateFormat
@@ -1444,30 +1443,12 @@ private fun DemoBadge(locale: String) {
 
 @Composable
 internal fun EyeShieldMascot(size: androidx.compose.ui.unit.Dp) {
-    val navy = SageNavy
-    val blue = SageBlue
-    Canvas(
-        modifier = Modifier.size(size).semantics { contentDescription = "SageSense eye shield mascot" },
-    ) {
-        val w = this.size.width
-        val h = this.size.height
-        val shield = Path().apply {
-            moveTo(w * .5f, h * .05f)
-            lineTo(w * .88f, h * .22f)
-            lineTo(w * .82f, h * .68f)
-            quadraticBezierTo(w * .72f, h * .88f, w * .5f, h * .97f)
-            quadraticBezierTo(w * .28f, h * .88f, w * .18f, h * .68f)
-            lineTo(w * .12f, h * .22f)
-            close()
-        }
-        drawPath(shield, color = navy)
-        drawOval(color = Color.White, topLeft = androidx.compose.ui.geometry.Offset(w * .22f, h * .31f), size = androidx.compose.ui.geometry.Size(w * .56f, h * .31f))
-        drawCircle(color = blue, radius = w * .075f, center = androidx.compose.ui.geometry.Offset(w * .38f, h * .465f))
-        drawCircle(color = blue, radius = w * .075f, center = androidx.compose.ui.geometry.Offset(w * .62f, h * .465f))
-        drawCircle(color = Color.White, radius = w * .025f, center = androidx.compose.ui.geometry.Offset(w * .355f, h * .435f))
-        drawCircle(color = Color.White, radius = w * .025f, center = androidx.compose.ui.geometry.Offset(w * .595f, h * .435f))
-        drawArc(color = Color.White, startAngle = 28f, sweepAngle = 124f, useCenter = false, topLeft = androidx.compose.ui.geometry.Offset(w * .35f, h * .57f), size = androidx.compose.ui.geometry.Size(w * .3f, h * .18f), style = Stroke(width = w * .025f))
-    }
+    Image(
+        painter = painterResource(R.drawable.sagesense_anti_scam_mascot),
+        contentDescription = "SageSense anti-scam shield companion",
+        modifier = Modifier.size(size),
+        contentScale = ContentScale.Fit,
+    )
 }
 
 @Composable
