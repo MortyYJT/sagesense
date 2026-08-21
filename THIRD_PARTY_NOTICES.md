@@ -15,6 +15,22 @@ SageSense source code is released under the MIT License. Dependencies retain the
 - DeepSeek V4 Flash is the selected underlying model. SageSense does not embed either provider credential in the Android app.
 - Vercel Functions, optional deployment target for the FastAPI service.
 
+## Android platform capabilities
+
+- `SYSTEM_ALERT_WINDOW` is an optional Android special access used only for the
+  event-only risk overlay. The user grants it in Android Settings; SageSense does
+  not use it to read or capture the screen, draw a resting bubble, or block calls.
+  If it is declined, the in-app Cognitive Pause and ordinary notifications remain
+  available. Any future Play-distributed release must complete the applicable
+  permission declaration and policy review.
+- Android notification channels are user-controlled and their importance/sound
+  settings are not mutable after creation. SageSense therefore uses versioned
+  `v4` risk channels for the current warning policy; this does not override a
+  user's later system-level choice. Technical references: [Android permission
+  reference](https://developer.android.com/reference/android/Manifest.permission),
+  [notification channel guidance](https://developer.android.com/develop/ui/compose/notifications/channels),
+  and [Google Play permission declarations](https://support.google.com/googleplay/android-developer/answer/9214102?hl=en).
+
 ## Typeface
 
 - **Atkinson Hyperlegible**, regular, italic, bold and bold italic, copyright 2020 Braille Institute of America, Inc. The typeface was designed for improved character recognition and is distributed under the SIL Open Font License 1.1. The licence text is packaged at `android/app/src/main/res/raw/atkinson_hyperlegible_ofl.txt`.

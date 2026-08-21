@@ -4,10 +4,10 @@ SageSense is an Android anti-scam companion designed for older adults. With expl
 
 > Hackathon prototype: SageSense provides warnings, not legal, financial, or fraud determinations. It never automatically blocks a call or declares a payment safe.
 
-> Release status: the Friday-night debug RC was built and automated/emulator
-> checks passed on 21 August 2026. Code freeze is targeted for Saturday,
-> 22 August 2026 at 12:00 AEST; physical-device checks remain pending until the
-> team runs them.
+> Release status: the current hardening tree has an installable debug RC with
+> passing backend, Android JVM, lint, build, production-Agent, and isolated
+> emulator checks. Physical-device acceptance remains Pending, so the final
+> submission tag has deliberately not been created.
 
 ## Demo story
 
@@ -38,8 +38,12 @@ all app-defined visible text styles are at least 22sp, and Material/custom touch
 targets are at least 56dp. Atkinson Hyperlegible is used globally for supported
 Latin glyphs; Android's system CJK fallback supplies Simplified Chinese glyphs.
 At 1.3x and 2.0x system font scale, the bottom navigation adapts to a two-by-two
-layout so labels remain readable. The app does not request an always-on overlay,
-AccessibilityService screen reading, or a full-screen intent.
+layout so labels remain readable. With explicit user permission, the app may show
+a small, transient risk overlay for a newly detected event or manual preview. It
+is never always-on, never reads or captures the screen, and auto-hides; without
+that special permission the normal in-app Cognitive Pause and notification remain
+the fallback. SageSense does not use AccessibilityService screen reading or a
+full-screen intent.
 
 Before any provider call, the backend applies a deterministic anti-scam topic
 gate and rejects off-topic or prompt-extraction requests. Pydantic bounds cap
@@ -57,7 +61,7 @@ no-match query produces no citations rather than unrelated sources.
 - `knowledge/` — curated bilingual summaries with source metadata.
 - `docs/` — PRD, design divergence, testing, video, and submission material.
 
-Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), and [current test report](docs/test-report.md).
+Start with the [PRD](docs/PRD.md), [delivery plan and team ownership](docs/PROJECT_PLAN.md), [current test report](docs/test-report.md), and [product-readiness audit](docs/product-readiness-audit.md).
 
 ## Run the backend
 
@@ -92,17 +96,38 @@ The default demo backend is `https://sagesense.vercel.app/`. To use a backend ru
 ```
 
 For a physical phone using a local backend, replace `10.0.2.2` with the computer's LAN address. Keep the default production URL for the competition demo.
+Cleartext HTTP is enabled only by the debug manifest for local development; the
+main/release manifest requires HTTPS.
 
 Install `android/app/build/outputs/apk/debug/app-debug.apk`. On a fresh
 installation, the app shows the protection setup prompt once and persists a
 seen flag; the prompt can be reopened manually from onboarding or Settings.
 Notification access and the call-screening role remain optional. Calls are
-always allowed to continue ringing.
+always allowed to continue ringing. The first screen also offers a private manual
+check for a pasted message, URL, or phone number; it is analysed locally and is
+not silently uploaded.
 
-Friday-night RC evidence: 21,191,579 bytes (20.21 MiB), SHA-256
-`a0ffa30305d35f4967bb08294567e516652e390ff8ae24891e92f5dbeb911b35`.
-The APK is configured for `https://sagesense.vercel.app/`; Agent calls have a
-15-second client deadline and never contain a provider key.
+The optional system overlay is deliberately event-based: it appears only for a
+real or seeded risk event, or when the user taps the preview in Settings. It is a
+temporary affordance for the current risk, not a floating assistant. SageSense
+does not inspect the current screen, take screenshots, or maintain a resting
+bubble. Notification channels were versioned to `v4` so the intended sound and
+vibration policy can take effect on installs that previously used an incompatible
+channel configuration.
+
+Current release-candidate evidence: 32 Android JVM tests and 22 backend tests
+pass; Android lint reports 0 errors and 7 dependency/version-availability
+warnings; the production Agent returned `degraded=false`; and an Android 17
+emulator passed fresh-install, permission no-repeat, real Google Messages,
+ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
+online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
+
+The current debug APK is 21,453,574 bytes with SHA-256
+`ad14c8b03ff6c90da37bbebbc395339296d02c8c8ea0b91260d95404ef650ec6`.
+It is configured for `https://sagesense.vercel.app/`; Agent calls have a
+15-second client deadline and never contain a provider key. See the
+[test report](docs/test-report.md) for the evidence boundary and the still-
+Pending physical-device gate.
 
 The seeded phone number `+61 400 000 999` and `.example` domain are presentation fixtures, not claims about real entities.
 
@@ -110,8 +135,12 @@ The seeded phone number `+61 400 000 999` and `.example` domain are presentation
 
 - Notification access is opt-in and restricted to supported packages.
 - OTP, card, and account-number patterns are redacted before persistence or Agent use.
+- Agent requests send redacted event context only: sender display names and sender
+  hashes are omitted, phone Watchlist values are masked, and URL lists are not
+  forwarded; a domain may be retained when it is needed to explain a risk.
 - At most 10 recent redacted summaries and 20 Watchlist entries are sent on an explicit Agent query.
 - The backend has no user database and does not persist request bodies.
+- Release builds require HTTPS; local cleartext endpoints are debug-only.
 - Agent requests are limited to 800 characters, bounded nested collections and
   redacted event fields; off-topic and prompt-extraction requests are stopped
   before the model provider is called.
@@ -120,6 +149,9 @@ The seeded phone number `+61 400 000 999` and `.example` domain are presentation
   requires a Vercel WAF rule.
 - Non-demo history is pruned after 30 days; users can delete it immediately.
 - Model outputs are validated, citation IDs are allowlisted, and safe actions require user confirmation.
+- Personal Scam Memory is a local similarity hint, not proof of a coordinated
+  campaign: it requires the same campaign fingerprint, a shared normalised domain,
+  or at least two meaningful risk signals, and only relates medium/high-risk events.
 
 ## Original blueprint and credits
 

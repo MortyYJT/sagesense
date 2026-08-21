@@ -1,10 +1,13 @@
 # SageSense delivery plan
 
-Last updated: Friday, 21 August 2026, 18:30 AEST
+Last updated: Saturday, 22 August 2026, 00:03 AEST
 
-Release status: installable debug RC built Friday night; code freeze Saturday, 22
-August 2026 at 12:00 AEST. Physical-device checks are still pending and must
-not be described as passed until recorded in the test report.
+Release status: the current release-hardening tree has an installable debug RC.
+Backend, production-Agent, Android JVM, lint, build and isolated-emulator gates
+pass. The optional event-only overlay, notification-channel v4, manual local
+checking, notification de-duplication, stricter Agent redaction and conservative
+Personal Scam Memory matching are included. Physical-device checks remain
+Pending and must not be described as passed until recorded in the test report.
 
 ## Team responsibilities
 
@@ -22,25 +25,30 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 
 ### Complete locally
 
-- Android project builds a 20.21 MiB debug APK with Kotlin, Compose, Room, DataStore and manual dependency injection.
+- Android project has a current 21,453,574-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `ad14c8b03ff6c90da37bbebbc395339296d02c8c8ea0b91260d95404ef650ec6`.
 - Notification listener, call-screening service, local risk engine, Watchlist, Personal Scam Memory and deep-linked alerts are implemented.
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
 - The backend is deployed at `https://sagesense.vercel.app`; a Sensitive `OPENCODE_API_KEY` routes DeepSeek V4 Flash through OpenCode Go. A production query returned `degraded=false` with allowlisted citations.
-- An Android emulator is connected as `emulator-5554`. No physical phone has been verified yet.
+- An isolated Android 17 / API 37 emulator passed a true fresh install, permission-prompt no-repeat and manual re-entry, overlay grant/revoke/preview/auto-hide/deep-link, real Google Messages notification, duplicate suppression, Watchlist call-while-ringing, manual local check, Personal Scam Memory, Agent online/offline, bilingual, 1.3x/2.0x font, theme persistence and delete-history scenarios. No physical phone has been verified yet.
 - Yijia Sheng's unified permission setup dialog is integrated with a persisted one-time fresh-install prompt. Emulator clear-data, dismiss and force-stop/relaunch checks pass; physical-device allow/deny/back cases remain pending.
 - Jiahui Zhou's UI contribution from `origin/ui/jzhou612-anti-scam-mascot` (`920fcc7`) is integrated on `codex/release-hardening`; the original large PNG was replaced by the provenance-recorded 512×512 transparent WebP.
 - Curated bilingual knowledge cards, PRD, design-divergence record, source register, test report, video script and submission checklist exist.
 - Deterministic anti-scam topic gating, bounded request schemas, and prompt-extraction rejection run before any provider call.
 - The prototype has a process-local best-effort limiter of 8 requests/minute and 2 concurrent requests per client; durable multi-instance enforcement remains a Vercel WAF responsibility.
 - Curated knowledge retrieval now uses weighted bilingual lexical matching with stable ordering; no-match queries return no citations. No vector database is intentionally in scope for this small curated corpus.
-- Backend tests pass: 22 on the current local tree. Android verification passes with 17 tests and 0 failures, lint 0 errors (11 non-blocking warnings), and a production-URL debug APK build.
-- Emulator evidence passes for the one-time permission prompt, bilingual seeded notification → Cognitive Pause → detail, adaptive 1.3×/2.0× fonts, Agent success with actions/citations through an ADB localhost tunnel, safe offline failure, and a seeded Watchlist call that remains `RINGING` while the bilingual call warning is visible.
+- Backend tests pass on the current tree: 22. Android `testDebugUnitTest` passes
+  32 tests; `lintDebug` reports 0 errors and 7 non-blocking dependency/version
+  availability warnings; `assembleDebug` succeeds. This automated and emulator
+  evidence is not a substitute for the still-Pending physical-device gate.
 
 ### Still required
 
 - Connect a physical Android phone and complete permission allow, deny, back and Settings re-entry; foreground/background notification; call role; offline; TalkBack; large-text; and delete-history checks.
-- Build the APK with `https://sagesense.vercel.app/` and verify the Android-to-Agent path on-device.
+- Install the production-URL RC on a physical phone and verify the Android-to-Agent path on-device.
+- Re-run optional overlay, channel sensation, manual check, duplicate suppression,
+  changed-sender Personal Scam Memory and outbound Agent privacy as a physical
+  smoke test only where observable; emulator and automated coverage already pass.
 - Keep the backend API contract frozen during release hardening; no Agent
   request/response or provider configuration changes are planned.
 - Keep the backend scope constrained to curated local knowledge: it has no arbitrary live web browsing and no vector database by design. A future production deployment still needs WAF-level multi-instance rate enforcement.
@@ -98,4 +106,5 @@ Do not cut notification detection, explainable evidence, history, Agent guidance
 2. This delivery plan
 3. [`divergence-log.md`](divergence-log.md)
 4. [`test-report.md`](test-report.md)
-5. [`demo-script.md`](demo-script.md)
+5. [`product-readiness-audit.md`](product-readiness-audit.md)
+6. [`demo-script.md`](demo-script.md)

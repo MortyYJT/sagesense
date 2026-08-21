@@ -45,19 +45,39 @@ The primary persona is an older adult who uses calls and messaging but may hesit
   demo events. Real-message warnings are high-priority with one audible and
   vibrating alert; call warnings are visible with one vibration while the call
   continues ringing; seeded demos are silent and clearly labelled.
-- Keep one authoritative in-app Cognitive Pause layer for a newly observed
-  medium/high event. Do not use an always-on overlay, AccessibilityService,
-  or full-screen intent.
-- Use a dimmed background, a high-contrast bilingual card, one short haptic, and clear `See Why` / `Not Now` actions; do not queue repeated overlays while one is visible.
+- Keep one authoritative Cognitive Pause layer for a newly observed medium/high
+  event. When the user has explicitly granted Android's special overlay access,
+  also show a small transient system overlay for that event; it auto-hides and
+  opens the matching Cognitive Pause on tap. A Settings preview may exercise the
+  same path without a new risk event.
+- The overlay is event-only, never a resting bubble: it must not read, capture,
+  OCR, or infer content from the current screen, and it must not use
+  AccessibilityService or a full-screen intent. If overlay access is absent,
+  the in-app Cognitive Pause and standard notification remain functional.
+- The in-app Cognitive Pause uses a dimmed background, a high-contrast bilingual
+  card, one short haptic, and clear `See Why` / `Not Now` actions. The separate
+  system overlay remains a compact, tappable shield and does not add another
+  haptic; do not queue repeated overlays while one is visible.
 - State that the warning is evidence, not a fraud verdict, and that SageSense does not block calls, make payments or contact organisations.
 - For Watchlist calls, state `Local Watchlist match` and `Call not blocked`; for seeded scenarios, label the card `Demo simulation · Seeded demo data`.
-- Keep the hackathon implementation inside the Compose app. Do not request `SYSTEM_ALERT_WINDOW` or describe the simulation as a cross-app system overlay.
+- Explain the special overlay permission in plain language and retain a manual
+  Settings entry. The overlay is an optional cross-app warning affordance, not a
+  screen-reading feature and not an automatic blocker.
 
 ### History and Personal Scam Memory
 
 - Display, search, and risk-filter events.
 - Show the local Watchlist with provenance and seeded-demo labels.
 - Relate events sharing a campaign fingerprint, domain, or multiple signal codes.
+- Personal Scam Memory only relates medium/high-risk events and requires the same
+  campaign fingerprint, a shared normalised domain, or at least two meaningful
+  signals; a changed sender alone is not enough.
+- Suppress identical notification updates within the short local de-duplication
+  window, while allowing changed content or a later occurrence to be analysed.
+- Provide a local manual check for a message, URL, or phone number; its input is
+  analysed on-device, and only a bounded sensitive-pattern-redacted summary is
+  retained in local history. Manual input is never sent to the Agent unless the
+  user later opens that event and explicitly asks a question.
 - Retain non-demo events for 30 days and support delete-all.
 
 ### Agent
@@ -79,7 +99,9 @@ The primary persona is an older adult who uses calls and messaging but may hesit
 
 ## Non-goals
 
-iOS, full SMS replacement, AccessibilityService screen reading, automatic blocking, voice/deepfake detection, cloud accounts, cloud history, analytics, and an always-on overlay are outside the hackathon MVP.
+iOS, full SMS replacement, AccessibilityService screen reading, OCR, automatic
+blocking, voice/deepfake detection, cloud accounts, cloud history, analytics,
+and an always-on/resting overlay are outside the hackathon MVP.
 
 ## Data model
 
@@ -94,3 +116,5 @@ iOS, full SMS replacement, AccessibilityService screen reading, automatic blocki
 - Do not request passwords, OTPs, card details, or identity documents.
 - Do not automatically call, message, block, delete, or report.
 - Display source provenance for Watchlist and factual Agent guidance.
+- Require HTTPS in main/release Android builds; permit cleartext HTTP only from
+  the debug manifest for explicit local development.

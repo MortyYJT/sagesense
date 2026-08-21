@@ -1,0 +1,99 @@
+# Product readiness audit
+
+Last updated: 2026-08-22 (Australia/Melbourne).
+
+SageSense is a feature-complete, installable competition release candidate. It
+demonstrates a credible end-to-end safety product, but it is not represented as
+a production-certified anti-fraud service. The evidence boundary is deliberate:
+automated and Android-emulator acceptance pass; physical-device acceptance and
+submission media remain Pending.
+
+## Current product completeness
+
+| Capability | Current state | Evidence boundary |
+|---|---|---|
+| Local message risk detection | Implemented | Real Google Messages notification passed on Android 17 emulator |
+| Watchlist call warning | Implemented; never blocks the call | Matching call remained `RINGING` on emulator |
+| Cognitive Pause and optional transient overlay | Implemented | Grant, revoke, preview, auto-hide and event deep link passed on emulator |
+| History, search, filters and delete-all | Implemented | Emulator plus JVM policy tests pass |
+| Watchlist and source provenance | Implemented with labelled fixtures | Seeded entries are not claimed as live threat intelligence |
+| Personal Scam Memory | Implemented conservatively | Requires a stable campaign/domain or at least two meaningful signals |
+| Constrained Agent | Implemented | Production query passed; offline deterministic fallback passed |
+| Bilingual and older-adult UI | Implemented | English/Chinese and 1.3x/2.0x emulator checks pass; physical TalkBack Pending |
+| Privacy controls | Implemented for prototype | Local redaction, HTTPS release policy, bounded Agent context and no cloud history |
+| Release build | Debug RC available | Final signing/tag is intentionally blocked on physical acceptance |
+
+## Must finish to maximise competition score
+
+These are release and evidence tasks, not reasons to add another feature before
+the code freeze.
+
+1. Complete the physical-device gate in `test-report.md`, recording phone model,
+   Android version, tester, and short clips for permissions, foreground/background
+   messages, a ringing call, alert sensation, overlay, Agent online/offline,
+   TalkBack/large text and delete-history.
+2. Capture a concise research-and-iteration story: original Sixth Sense blueprint,
+   older-adult accessibility decisions, failed/changed ideas, privacy trade-offs,
+   and one or two pieces of real tester feedback with resulting changes.
+3. Record the 4:30 demo from a real phone. Clearly label seeded data, show that a
+   call keeps ringing, and distinguish deterministic local detection from the
+   explanatory Agent.
+4. Add final screenshots and the architecture graphic to README, finish subtitles,
+   Devpost copy and downloadable APK/setup instructions.
+5. Verify repository, video, APK and source ZIP in a logged-out browser. Only then
+   create `catalyst-2026-submission` after the physical gate passes.
+
+## Physical release test points
+
+### P0 — blocks the core demonstration
+
+- Fresh install can allow, deny or back out of every permission without a loop.
+- A supported message received with the app foregrounded and backgrounded creates
+  exactly one event, a warning and a working deep link.
+- A Watchlist call continues ringing while the warning remains visible.
+- The production Agent answers; airplane mode retains local evidence and safe
+  fallback guidance.
+- Delete-all removes events without removing seeded Watchlist fixtures.
+
+### P1 — blocks a credible accessible demonstration
+
+- Real message alert is audible/vibrating, call adds no second notification sound,
+  and seeded demo remains silent.
+- Overlay grant/revoke/tap/auto-hide works on the chosen recording phone.
+- Chinese, 1.3x/2.0x fonts and TalkBack have no clipped core actions or misleading
+  labels; reading order reaches risk, evidence and actions coherently.
+- Repeated notification updates do not create a visible event storm.
+
+### P2 — record as known limitations rather than rush before freeze
+
+- OEM-specific behaviour outside the recording phone.
+- Play Store review of call-screening and draw-over-other-apps declarations.
+- Long-duration soak, battery and memory profiling.
+
+## What a production commercial product still needs
+
+1. **Threat intelligence:** authenticated, versioned and reviewable number/domain
+   feeds, expiry and appeal handling, provenance SLAs, regional coverage and an
+   emergency rollback path. Current Watchlist rows are labelled fixtures.
+2. **Measured detection quality:** a consented representative corpus, precision,
+   recall, false-positive/false-negative targets, threshold calibration, IDN and
+   Unicode adversarial cases, and continuous regression evaluation.
+3. **User research:** moderated testing with older adults and carers, accessibility
+   specialists, comprehension/time-to-safe-action metrics, and documented design
+   iterations. Emulator acceptance is not user validation.
+4. **Platform compliance:** Google Play policy review for notification access,
+   call-screening and `SYSTEM_ALERT_WINDOW`; OEM/device matrix testing; release
+   signing, staged rollout and rollback.
+5. **Security and privacy:** formal threat model and data-protection assessment,
+   legal review, penetration testing, dependency/SBOM scanning, secret rotation,
+   abuse monitoring, retention verification and a user-facing privacy policy.
+6. **Reliable backend controls:** durable distributed rate limiting/WAF, service
+   authentication or attestation, observability without sensitive payloads,
+   SLOs, alerting, provider failover, cost ceilings and incident response.
+7. **Production operations:** crash/ANR monitoring with consent, CI/CD release
+   gates, signed artifacts, support/escalation flows, localisation review and a
+   maintained content/update process.
+
+These items should be presented as the post-hackathon roadmap. Adding RAG, a
+vector database, arbitrary web browsing, OCR or an always-on floating assistant
+would not substitute for these safety and product-validation requirements.

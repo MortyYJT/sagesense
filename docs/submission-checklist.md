@@ -2,9 +2,11 @@
 
 ## Build freeze
 
-- [x] Backend tests pass on Python 3.12 (10 tests, 2026-08-21).
+- [x] Backend tests pass on Python 3.12 (22 tests, 2026-08-22).
 - [x] Production Agent returns `degraded=false` through OpenCode Go without exposing its key.
-- [x] Android unit tests, lint and debug APK build pass (2026-08-20).
+- [x] Current Android main source compiles and 32 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
+- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,453,574 bytes with SHA-256 `ad14c8b03ff6c90da37bbebbc395339296d02c8c8ea0b91260d95404ef650ec6`.
+- [x] Emulator verifies overlay grant/deny/revoke, preview, auto-hide, tap-through, notification channel v4, manual check, two-event Scam Memory and Agent online/offline.
 - [ ] Fresh-install physical-device smoke test passes.
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.
 - [x] Seeded demo data is visibly labelled.
@@ -14,17 +16,18 @@
 
 ## Documentation and licensing
 
-- [ ] README has current setup steps, screenshots and architecture.
-- [ ] Product explanation covers background, process, technical choices and innovation.
-- [ ] `docs/divergence-log.md` records every material blueprint change.
+- [ ] README has current setup steps, architecture and final screenshots (setup and architecture are current; screenshots remain Pending).
+- [x] Product explanation covers background, process, technical choices and innovation.
+- [x] `docs/divergence-log.md` records every material blueprint change.
 - [ ] Billy Hermawan and Sixth Sense are credited in README, pitch and Devpost.
-- [ ] Third-party APIs, libraries, sources, fonts and assets are listed.
-- [ ] Supplied PDF/FIG and unlicensed original assets are absent from the repository ZIP.
+- [x] Third-party APIs, libraries, sources, fonts and assets are listed.
+- [x] Supplied PDF/FIG and unlicensed original assets are absent from the tracked repository tree; recheck the final ZIP.
 
 ## Video
 
 - [ ] 3–5 minutes, 1080p, intelligible audio and subtitles.
 - [ ] Real Android build is shown; no clickable-only mockup is presented as working software.
+- [ ] Optional floating warning is described accurately: event-only, user-granted, auto-hiding, and never reading/capturing the current screen.
 - [ ] Call and notification fixtures are described as seeded demo data.
 - [ ] Video is publicly viewable without login.
 - [ ] A local backup exists.

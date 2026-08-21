@@ -10,11 +10,11 @@ Credit Billy Hermawan's Sixth Sense Product-thon blueprint. Show the retained lo
 
 ## 0:40–1:40 — Notification flow
 
-On a real phone, press **Send seeded demo scam**. Show the clearly labelled notification, automatic warning, deep link, score, evidence, redacted content, and safe next steps. State that detection remains on-device.
+On a real phone, press **Send seeded demo scam**. Show the clearly labelled notification and optional short-lived floating warning, then tap it into the Cognitive Pause and matching evidence page. Show the score, redacted content, and safe next steps. State that detection remains on-device and that the floating warning never reads or captures the current screen.
 
 ## 1:40–2:35 — History, memory and Agent
 
-Open history and the selected event. Show Personal Scam Memory relating a changed sender to a recent campaign. Ask “Why is this risky?” Show the concise answer, actions and official source links. Mention that the server routes DeepSeek V4 Flash through OpenCode Go, while deterministic guidance remains available if the provider cannot be reached.
+Send the seeded demo a second time, then open history and the selected event. Show Personal Scam Memory relating the changed sender/domain through shared scam signals. Ask “Why is this risky?” Show the concise answer, actions and official source links. Mention that the server routes DeepSeek V4 Flash through OpenCode Go, while local evidence and deterministic guidance remain available if the provider cannot be reached.
 
 ## 2:35–3:10 — Call warning
 
@@ -22,11 +22,11 @@ Call the device from the seeded number `+61 400 000 999`, or use a labelled prer
 
 ## 3:10–3:40 — Learn, bilingual, accessibility
 
-Switch to Chinese, open a Learn card, and demonstrate large text, high contrast, visible labels and optional permissions.
+Switch to Chinese, open a Learn card, and demonstrate large text, high contrast, visible labels and optional permissions. Keep a short manual local-check clip as backup footage for the permission-denied story.
 
 ## 3:40–4:15 — Architecture and privacy
 
-Show the architecture diagram. Explain local rules, Room, redaction, explicit Agent queries, no user database, the server-only OpenCode Go key, allowlisted citations and user-confirmed actions.
+Show the architecture diagram. Explain local rules, Room, redaction, explicit Agent queries, no user database, the server-only OpenCode Go key, allowlisted citations and user-confirmed actions. State that sender identity, phone values and full URL paths/query parameters do not leave the phone.
 
 ## 4:15–4:30 — Impact and credits
 

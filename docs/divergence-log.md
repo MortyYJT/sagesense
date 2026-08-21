@@ -4,7 +4,7 @@
 |---|---|---|---|
 | Mobile safety companion | Kept as a native Android app | Automation and system permissions are central to the concept | Preserves the original point-of-risk intervention |
 | iOS Dynamic Island | Not implemented | Team is Android-first and unfamiliar with iOS | Android implementation is independently judged |
-| Android floating avatar | Deferred stretch goal | Overlay permission adds risk and build time | In-app eye-shield mascot retains companionship without invasive overlay access; no `SYSTEM_ALERT_WINDOW`, AccessibilityService, or full-screen intent is used |
+| Android floating avatar | Reframed as an optional event-only system warning | A resting avatar would be distracting and require invasive access; a short-lived warning is useful at the point of risk | `SYSTEM_ALERT_WINDOW` is requested only after user action; the overlay auto-hides, never reads/captures the screen, never rests on screen, and falls back to the in-app Cognitive Pause; no AccessibilityService or full-screen intent is used |
 | Alert explains why | Kept and expanded | Older users need evidence and a clear next step | Supports the blueprint's low-density, confidence-building design |
 | Automatic call protection | Changed to warning-only call screening | False positives must not silently remove legitimate calls | User remains in control; call continues ringing |
 | General AI chat | Constrained to a read-only advisor | An unconstrained chatbot could hallucinate or take unsafe actions | Local rules produce verdicts; Agent only explains and retrieves evidence |
@@ -27,3 +27,10 @@ shows the protection setup prompt once and persists a seen flag, while users
 retain manual re-entry from onboarding and Settings. Real-message warnings are
 audible/vibrating, Watchlist call warnings are visible/vibrating while the call
 continues, and seeded demo alerts are silent.
+
+The current hardening pass additionally keeps a local manual check, suppresses
+identical notification updates for a short window, sends only redacted Agent
+context (with phone values masked and sender identity omitted), and treats
+Personal Scam Memory as a conservative local similarity hint rather than a fraud
+determination. Notification channels are versioned to `v4` to avoid inheriting an
+older channel's user-muted configuration.

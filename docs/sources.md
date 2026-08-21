@@ -13,3 +13,11 @@ Accessed 2026-08-20. SageSense stores original bilingual summaries of these sour
 | `ic3-elder-fraud` | FBI Internet Crime Complaint Center | <https://www.ic3.gov/CrimeInfo/ElderFraud> | Common elder-fraud schemes and official reporting resources |
 
 Additional background references from the original Sixth Sense deck should be listed in the final Devpost bibliography if used in the pitch. Factual claims not supported by this manifest must be removed or cited before submission.
+
+## Platform and release references
+
+| Publisher | Source | Claims supported |
+|---|---|---|
+| Android Developers | <https://developer.android.com/reference/android/Manifest.permission> | `SYSTEM_ALERT_WINDOW` is special access intended for a narrow class of cross-app interactions and requires explicit user approval |
+| Android Developers | <https://developer.android.com/develop/ui/compose/notifications/channels> | Notification-channel importance and alert behaviour are user-visible and cannot be freely changed after a channel is created |
+| Google Play Console Help | <https://support.google.com/googleplay/android-developer/answer/9214102?hl=en> | A future Play release may require permission declarations and policy review |
