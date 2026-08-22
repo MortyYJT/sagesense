@@ -1,8 +1,8 @@
 # Devpost submission draft
 
 Replace every bracketed placeholder and attach final real-device evidence before
-submission. Do not change `Pending` claims to `Pass` until the physical test
-report is signed.
+submission. The core phone smoke test is user-reported in `test-report.md`;
+final URLs and media still require separate verification.
 
 ## Project name
 

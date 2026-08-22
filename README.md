@@ -5,9 +5,9 @@ SageSense is an Android anti-scam companion designed for older adults. With expl
 > Hackathon prototype: SageSense provides warnings, not legal, financial, or fraud determinations. It never automatically blocks a call or declares a payment safe.
 
 > Release status: the current hardening tree has an installable debug RC with
-> passing backend, Android JVM, lint, build, production-Agent, and isolated
-> emulator checks. Physical-device acceptance remains Pending, so the final
-> submission tag has deliberately not been created.
+> passing backend, Android JVM, lint, build, production-Agent, emulator, and
+> user-reported core physical-device checks. No P0/P1 issue was reported in the
+> final phone smoke test; remaining work is submission media and packaging.
 
 ## Demo story
 
@@ -128,9 +128,11 @@ online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 The current debug APK is 21,454,010 bytes with SHA-256
 `aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
-30-second client deadline and never contain a provider key. See the
-[test report](docs/test-report.md) for the evidence boundary and the still-
-Pending physical-device gate.
+30-second client deadline and never contain a provider key. On 22 August 2026,
+the team lead reported a passing physical-phone smoke test for first-launch
+permission allow/deny/back/no-repeat, real-message sound/vibration, call alert
+sound interaction, online/offline Agent, Chinese, 1.3x/2.0x fonts and TalkBack.
+See the [test report](docs/test-report.md) for the exact evidence boundary.
 
 The seeded phone number `+61 400 000 999` and `.example` domain are presentation fixtures, not claims about real entities.
 

@@ -2,9 +2,9 @@
 
 Last updated: 2026-08-22 (Australia/Melbourne).
 
-This report separates automated and Android-emulator evidence from the physical-
-device acceptance gate. A passing emulator run does not claim that a real phone's
-OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed.
+This report separates automated, Android-emulator and user-reported physical-
+device evidence. A passing emulator run is never used as evidence for a real
+phone's OEM permission UI, vibration, ringtone interaction or TalkBack behaviour.
 
 ## Release-candidate build evidence
 
@@ -88,23 +88,26 @@ Device: `SageSense_API_37`, `sdk_gphone64_arm64`, Android 17 / API 37.
 | Theme persistence | Dark mode remained selected after force-stop/relaunch | Pass |
 | 1.3× and 2.0× fonts | Content remained scrollable; bottom navigation switched to a two-by-two layout instead of clipping labels | Pass visual/emulator |
 
-## Physical-device gate — still Pending
+## Physical-device acceptance
 
-Record phone model, Android version, tester initials and a clip/screenshot for
-each row. Do not replace `Pending` with `Pass` based on emulator evidence.
+The team lead reported the following results from the installed RC on 22 August
+2026. No P0/P1 bug was observed during general use. Phone model, Android version
+and clips were not recorded, so these rows are explicitly user-reported rather
+than independently reproduced evidence.
 
 | Scenario | Expected | Status |
 |---|---|---|
-| Fresh-install permission allow/deny/back | No permission loop; accurate ON/OFF state and Settings recovery | Pending |
-| Foreground default SMS app | Real test SMS creates the risk flow while SageSense is foregrounded | Pass (user-reported after `cd4b4d5`; device metadata and clip Pending) |
-| Background default SMS app and de-duplication | Local warning, history and deep link work while backgrounded without an event storm | Pending |
-| Watchlist call | Phone keeps ringing; warning is visible; seeded fixture is named as demo data | Pending |
-| Alert sensation | Real message is audible/vibrating; call adds no notification sound; seeded demo is silent | Pending |
-| Overlay grant/revoke/tap | Optional warning appears only when granted, auto-hides and opens the matching event | Pending |
-| Agent production/offline | Online citations and offline local guidance both render | Pending |
-| Chinese, 1.3×/2.0× and TalkBack | No clipped core action; labels and reading order are usable | Pending |
-| Delete history | Events disappear and seeded Watchlist remains | Pending |
+| Fresh-install permission allow/deny/back | No permission loop; accurate ON/OFF state and Settings recovery | Pass — user-reported, including no-repeat |
+| Foreground default SMS app | Real test SMS creates the risk flow while SageSense is foregrounded | Pass — user-reported after `cd4b4d5` |
+| Background default SMS app and de-duplication | Local warning, history and deep link work while backgrounded without an event storm | Not separately re-recorded on phone; emulator Pass |
+| Watchlist call | Phone keeps ringing; warning is visible; seeded fixture is named as demo data | Pass — user-reported warning/sound interaction; emulator verifies ringing and fixture label |
+| Alert sensation | Real message is audible/vibrating; call adds no second notification sound; seeded demo is silent | Pass — user-reported for real message and call; demo policy verified on emulator |
+| Overlay grant/revoke/tap | Optional warning appears only when granted, auto-hides and opens the matching event | Not separately re-recorded on phone; emulator Pass |
+| Agent production/offline | Online answer and airplane-mode local guidance both render | Pass — user-reported |
+| Chinese, 1.3×/2.0× and TalkBack | No clipped core action; labels and reading order are usable | Pass — user-reported |
+| Delete history | Events disappear and seeded Watchlist remains | Not separately re-recorded on phone; emulator Pass |
 
-The final `catalyst-2026-submission` tag remains blocked on this physical-device
-gate. README screenshots, video, Devpost, clean ZIP and logged-out public-link
-checks are separate submission deliverables and are not implied by this report.
+The core physical-device gate is accepted on the team lead's report, with the
+evidence limits above. README screenshots, video, Devpost, clean ZIP and
+logged-out public-link checks remain separate submission deliverables and are
+not implied by this report.

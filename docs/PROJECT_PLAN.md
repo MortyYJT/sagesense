@@ -6,8 +6,9 @@ Release status: the current release-hardening tree has an installable debug RC.
 Backend, production-Agent, Android JVM, lint, build and isolated-emulator gates
 pass. The optional event-only overlay, notification-channel v4, manual local
 checking, notification de-duplication, stricter Agent redaction and conservative
-Personal Scam Memory matching are included. Physical-device checks remain
-Pending and must not be described as passed until recorded in the test report.
+Personal Scam Memory matching are included. The team lead reported the core
+physical-device smoke test passing on 22 August; exact evidence limits are
+recorded in the test report.
 
 ## Team responsibilities
 
@@ -30,8 +31,8 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
 - The backend is deployed at `https://sagesense.vercel.app`; a Sensitive `OPENCODE_API_KEY` routes DeepSeek V4 Flash through OpenCode Go. A production query returned `degraded=false` with allowlisted citations.
-- An isolated Android 17 / API 37 emulator passed a true fresh install, permission-prompt no-repeat and manual re-entry, overlay grant/revoke/preview/auto-hide/deep-link, real Google Messages notification, duplicate suppression, Watchlist call-while-ringing, manual local check, Personal Scam Memory, Agent online/offline, bilingual, 1.3x/2.0x font, theme persistence and delete-history scenarios. A real foreground SMS through the phone's default SMS app was user-confirmed after `cd4b4d5`; the full physical-device gate remains pending.
-- Yijia Sheng's unified permission setup dialog is integrated with a persisted one-time fresh-install prompt. Emulator clear-data, dismiss and force-stop/relaunch checks pass; physical-device allow/deny/back cases remain pending.
+- An isolated Android 17 / API 37 emulator passed a true fresh install, permission-prompt no-repeat and manual re-entry, overlay grant/revoke/preview/auto-hide/deep-link, real Google Messages notification, duplicate suppression, Watchlist call-while-ringing, manual local check, Personal Scam Memory, Agent online/offline, bilingual, 1.3x/2.0x font, theme persistence and delete-history scenarios. The team lead subsequently reported the core physical-phone smoke test passing with no P0/P1 bug observed.
+- Yijia Sheng's unified permission setup dialog is integrated with a persisted one-time fresh-install prompt. Clear-data, dismiss and relaunch checks pass on the emulator; allow/deny/back/no-repeat passed in the user-reported physical-phone check.
 - Jiahui Zhou's UI contribution from `origin/ui/jzhou612-anti-scam-mascot` (`920fcc7`) is integrated on `codex/release-hardening`; the original large PNG was replaced by the provenance-recorded 512×512 transparent WebP.
 - Curated bilingual knowledge cards, PRD, design-divergence record, source
   register, test report, privacy notice, security statement, threat model, video
@@ -46,8 +47,8 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - Curated knowledge retrieval now uses weighted bilingual lexical matching with stable ordering; no-match queries return no citations. No vector database is intentionally in scope for this small curated corpus.
 - Backend tests pass on the current tree: 31. Android `testDebugUnitTest` passes
   49 tests; `lintDebug` reports 0 errors and 7 non-blocking dependency/version
-  availability warnings; `assembleDebug` succeeds. This automated and emulator
-  evidence is not a substitute for the still-Pending physical-device gate.
+  availability warnings; `assembleDebug` succeeds. Automated, emulator and
+  user-reported physical evidence remain labelled separately in the test report.
 - A debug-only, Android `DUMP`-permission-protected ADB hook can add and remove a
   masked temporary second-phone fixture for physical call QA. Add → ringing call
   → warning and remove → no new event passed on the emulator; the generated
@@ -55,15 +56,12 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 
 ### Still required
 
-- Connect a physical Android phone and complete permission allow, deny, back and Settings re-entry; foreground/background notification; call role; offline; TalkBack; large-text; and delete-history checks.
-- Install the production-URL RC on a physical phone and verify the Android-to-Agent path on-device.
-- Re-run optional overlay, channel sensation, manual check, duplicate suppression,
-  changed-sender Personal Scam Memory and outbound Agent privacy as a physical
-  smoke test only where observable; emulator and automated coverage already pass.
+- Preserve the installed production-URL RC and avoid feature changes before recording.
+- If convenient during recording, capture device metadata and clips for the already user-confirmed permission, alert, call, Agent and accessibility flows; do not block code freeze on duplicate evidence.
 - Keep the backend API contract frozen during release hardening; no Agent
   request/response or provider configuration changes are planned.
 - Keep the backend scope constrained to curated local knowledge: it has no arbitrary live web browsing and no vector database by design. A future production deployment still needs WAF-level multi-instance rate enforcement.
-- Merge the reviewed release-hardening commits to `main` now; do not create the final submission tag until Saturday's physical-device gate passes.
+- Tag the reviewed, physically accepted release-hardening commit and keep code frozen.
 - Capture real-device clips, complete the video, prepare Devpost, build the clean ZIP and test every public link while logged out.
 
 ## Schedule

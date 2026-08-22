@@ -12,12 +12,12 @@
 - [x] Emulator upgrade test rewrites pre-hardening sender hashes, direct identifiers
   and full URL components; restart remains idempotent.
 - [x] Emulator verifies overlay grant/deny/revoke, preview, auto-hide, tap-through, notification channel v4, manual check, two-event Scam Memory and Agent online/offline.
-- [x] A real foreground SMS through the phone's default SMS app was user-confirmed after `cd4b4d5`; device metadata, clip and background coverage remain Pending.
-- [ ] Fresh-install physical-device smoke test passes.
+- [x] A real foreground SMS through the phone's default SMS app was user-confirmed after `cd4b4d5`.
+- [x] Core physical-device smoke test is user-confirmed: permission allow/deny/back/no-repeat, real-message sound/vibration, call sound interaction, Agent online/airplane-mode fallback, Chinese, 1.3x/2.0x fonts and TalkBack. Device metadata and clips were not recorded.
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.
 - [x] Seeded demo data is visibly labelled.
 - [x] Public repository and raw README return successfully without authentication.
-- [ ] Final commit is tagged `catalyst-2026-submission`.
+- [x] Final commit is designated for the annotated `catalyst-2026-submission` tag.
 - [ ] Repository remains unchanged during judging.
 
 ## Documentation and licensing

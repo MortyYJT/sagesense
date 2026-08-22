@@ -5,8 +5,9 @@
 SageSense is a Catalyst 2026 hackathon prototype for a local, explainable
 anti-scam warning. This document describes the prototype's intended data
 boundary; it is not a production privacy policy, legal advice, or a promise
-that a third-party provider will retain no data. Physical-device acceptance is
-still pending and the distributed build is a debug release candidate.
+that a third-party provider will retain no data. Core physical-device smoke
+testing was user-confirmed on 22 August 2026, but the distributed build remains
+a debug release candidate rather than a production app.
 
 ## 中文摘要
 

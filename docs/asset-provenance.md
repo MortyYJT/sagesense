@@ -14,6 +14,6 @@ claim that Billy created the SageSense mascot.
 ## Release status
 
 The mascot asset is part of the UI release-hardening work. Binary optimization,
-alpha-channel inspection and Android 17 emulator rendering passed locally. Final
-physical-device verification remains Pending and must be reported with the
-release-candidate evidence.
+alpha-channel inspection and Android 17 emulator rendering passed locally. Core
+physical-device smoke testing was user-confirmed on 22 August 2026 and is
+reported with its evidence boundary in the release-candidate test report.

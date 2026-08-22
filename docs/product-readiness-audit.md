@@ -5,33 +5,32 @@ Last updated: 2026-08-22 (Australia/Melbourne).
 SageSense is a feature-complete, installable competition release candidate. It
 demonstrates a credible end-to-end safety product, but it is not represented as
 a production-certified anti-fraud service. The evidence boundary is deliberate:
-automated and Android-emulator acceptance pass; physical-device acceptance and
-submission media remain Pending.
+automated and Android-emulator acceptance pass, and the team lead reported the
+core physical-device smoke test passing. Submission media remain incomplete.
 
 ## Current product completeness
 
 | Capability | Current state | Evidence boundary |
 |---|---|---|
-| Local message risk detection | Implemented | Real Google Messages notification passed on Android 17 emulator |
-| Watchlist call warning | Implemented; never blocks the call | Matching call remained `RINGING` on emulator |
+| Local message risk detection | Implemented | Emulator path passed; real SMS warning and alert sensation user-confirmed on phone |
+| Watchlist call warning | Implemented; never blocks the call | Emulator verifies `RINGING`; phone sound interaction user-confirmed |
 | Cognitive Pause and optional transient overlay | Implemented | Grant, revoke, preview, auto-hide and event deep link passed on emulator |
 | History, search, filters and delete-all | Implemented | Emulator plus JVM policy tests pass |
 | Watchlist and source provenance | Implemented with labelled fixtures | Seeded entries are not claimed as live threat intelligence |
 | Personal Scam Memory | Implemented conservatively | Requires a stable campaign/domain or at least two meaningful signals |
 | Constrained Agent | Implemented | Production query passed; offline deterministic fallback passed |
-| Bilingual and older-adult UI | Implemented | English/Chinese and 1.3x/2.0x emulator checks pass; physical TalkBack Pending |
+| Bilingual and older-adult UI | Implemented | English/Chinese, 1.3x/2.0x and TalkBack user-confirmed on phone |
 | Privacy controls | Implemented for prototype | Minimized Room writes and legacy-row migration, backend re-sanitisation, HTTPS release policy, bounded Agent context, public notice/threat model and no cloud history |
-| Release build | Debug RC available | Final signing/tag is intentionally blocked on physical acceptance |
+| Release build | Debug RC accepted for competition | Debug prototype; not Play-signed or production-certified |
 
 ## Must finish to maximise competition score
 
 These are release and evidence tasks, not reasons to add another feature before
 the code freeze.
 
-1. Complete the physical-device gate in `test-report.md`, recording phone model,
-   Android version, tester, and short clips for permissions, foreground/background
-   messages, a ringing call, alert sensation, overlay, Agent online/offline,
-   TalkBack/large text and delete-history.
+1. Capture phone model, Android version and short clips for the already accepted
+   physical-device story where useful to the video; retain the exact evidence
+   boundary in `test-report.md`.
 2. Capture a concise research-and-iteration story: original Sixth Sense blueprint,
    older-adult accessibility decisions, failed/changed ideas, privacy trade-offs,
    and one or two pieces of real tester feedback with resulting changes.
@@ -40,8 +39,8 @@ the code freeze.
    explanatory Agent.
 4. Add final screenshots and the architecture graphic to README, finish subtitles,
    Devpost copy and downloadable APK/setup instructions.
-5. Verify repository, video, APK and source ZIP in a logged-out browser. Only then
-   create `catalyst-2026-submission` after the physical gate passes.
+5. Verify repository, video, APK and source ZIP in a logged-out browser and keep
+   the tagged source unchanged during judging.
 
 ## Physical release test points
 

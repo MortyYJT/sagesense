@@ -5,8 +5,8 @@
 This is a practical abuse review of the Android app, its local Room store, the
 Vercel-hosted FastAPI Agent endpoint, and the OpenCode Go/DeepSeek provider
 boundary. It is not a penetration test, a formal assurance case, or a claim of
-production readiness. The current build is a debug RC and physical-device
-acceptance is still pending.
+production readiness. The current build is a physically smoke-tested debug RC,
+not a production-signed or production-certified release.
 
 ## 中文摘要
 
