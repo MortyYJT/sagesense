@@ -12,7 +12,7 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 |---|---|---|
 | Backend | `.venv/bin/pytest -q backend/tests` | Pass: 31 tests, 0 failures |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
-| GitHub CI | [CI run 16](https://github.com/MortyYJT/sagesense/actions/runs/32497129302) for release code/docs at `20a4e29` | Pass: backend and Android jobs completed successfully |
+| GitHub CI | [CI run 32543747440](https://github.com/MortyYJT/sagesense/actions/runs/32543747440) for release code/docs at `0198b1d` | Pass: backend and Android jobs completed successfully |
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
 | Production privacy boundary | Health headers plus a synthetic invalid-locale request after deployment | Pass: `no-store`, `no-referrer`, `nosniff`, frame/permissions headers; stable 422 did not echo the marker |
 | Android JVM | `./gradlew testDebugUnitTest` | Pass: 44 tests, 0 failures/errors/skips |
