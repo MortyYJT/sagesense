@@ -9,7 +9,7 @@ SageSense is an Android anti-scam companion designed for older adults. With expl
 > user-reported core physical-device checks. No P0/P1 issue was reported in the
 > final phone smoke test; remaining work is submission media and packaging.
 
-Demo video (4:52, 1080p): <https://youtu.be/vICMmT2Kj7s>
+Demo video (4:52): <https://youtu.be/GRfb4cCK7PQ>
 
 ## Demo story
 

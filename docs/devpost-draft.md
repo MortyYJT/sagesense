@@ -135,7 +135,7 @@ DeepSeek V4 Flash · OpenCode Go · Vercel
   Cyber Security Centre, FTC and FBI IC3. Full URLs and supported claims are in
   `docs/sources.md`.
 - Source: <https://github.com/MortyYJT/sagesense>
-- Video: <https://youtu.be/vICMmT2Kj7s>
+- Video: <https://youtu.be/GRfb4cCK7PQ>
 - Installation and build instructions: <https://github.com/MortyYJT/sagesense#run-android>
 
 ## Team

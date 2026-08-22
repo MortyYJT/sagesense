@@ -35,11 +35,11 @@
 
 ## Video
 
-- [x] YouTube video is 4:52, offers 1080p, has captions and is publicly retrievable without login.
+- [x] YouTube video is 4:52, has captions and is publicly retrievable without login.
 - [x] Video narration moves from architecture slides to the real Android build and demonstrates the non-blocking call flow.
 - [x] Optional floating warning is not overclaimed in the narration; repository documentation defines its event-only boundary.
 - [ ] Video narration does not explicitly call its number/message fixtures seeded demo data. The final Devpost draft now states this; add the same sentence to the YouTube description if time allows.
-- [x] Video is publicly viewable without login: `https://youtu.be/vICMmT2Kj7s`.
+- [x] Video is publicly viewable without login: `https://youtu.be/GRfb4cCK7PQ`.
 - [ ] A local backup exists.
 
 ## Devpost
