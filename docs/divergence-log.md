@@ -42,6 +42,11 @@ FastAPI repeats this sanitisation for untrusted callers, uses non-echoing
 validation errors and no-store security headers, and applies prompt-injection
 checks to nested event/Watchlist context as well as the question.
 
+Upgrades from a pre-hardening debug build now run a DataStore-versioned,
+retry-safe rewrite of retained Room events. This closes the gap where an older
+installation could otherwise keep sender hashes or full links after installing
+the newer privacy-preserving APK.
+
 Physical call acceptance uses an ADB-only temporary caller fixture in debug
 builds because a normal second phone cannot safely spoof the fixed seeded number.
 The component requires Android's signature-level `DUMP` permission, accepts only

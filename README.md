@@ -118,15 +118,15 @@ bubble. Notification channels were versioned to `v4` so the intended sound and
 vibration policy can take effect on installs that previously used an incompatible
 channel configuration.
 
-Current release-candidate evidence: 44 Android JVM tests and 31 backend tests
+Current release-candidate evidence: 49 Android JVM tests and 31 backend tests
 pass; Android lint reports 0 errors and 7 dependency/version-availability
 warnings; the production Agent returned `degraded=false`; and an Android 17
 emulator passed fresh-install, permission no-repeat, real Google Messages,
 ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
 online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 
-The current debug APK is 21,022,720 bytes with SHA-256
-`83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`.
+The current debug APK is 21,454,010 bytes with SHA-256
+`aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
 30-second client deadline and never contain a provider key. See the
 [test report](docs/test-report.md) for the evidence boundary and the still-
@@ -158,6 +158,8 @@ from release builds. Follow the exact commands in the
 - Before Room persistence, sender labels and evidence snippets are minimised;
   phone/email/password/OTP/card/account patterns are redacted, stable sender
   hashes are not retained, and links are reduced to scheme plus host.
+- On the first upgraded launch, a versioned and retry-safe migration rewrites
+  history created by pre-hardening builds through the same privacy boundary.
 - Agent requests send redacted event context only: sender display names and sender
   hashes are omitted, phone Watchlist values are masked, and URL lists are not
   forwarded; a domain may be retained when it is needed to explain a risk.

@@ -65,6 +65,8 @@ prototype and does not promise a response time, bounty, or legal safe harbour.
 - The ADB temporary caller fixture is debug-only and protected by Android's
   signature-level `DUMP` permission. The release merged manifest excludes it.
 - Non-demo local history is pruned after 30 days and users can delete it all.
+- A versioned startup migration rewrites retained rows from pre-hardening builds
+  through the current privacy filter without logging row content.
 
 ## Known limitations and residual risk
 

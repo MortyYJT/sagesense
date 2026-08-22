@@ -6,10 +6,13 @@
 - [x] Production Agent returns `degraded=false` through OpenCode Go without exposing its key.
 - [x] Production FastAPI returns the privacy/security headers and a non-echoing
   validation error verified after deployment.
-- [x] GitHub CI run 32543747440 passed both backend and Android jobs for the release code/docs at `0198b1d`.
-- [x] Current Android source compiles and 44 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
-- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,022,720 bytes with SHA-256 `83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`.
+- [x] GitHub CI run 32554775871 passed both backend and Android jobs for `cd4b4d5`.
+- [x] Current Android source compiles and 49 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
+- [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 21,454,010 bytes with SHA-256 `aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`.
+- [x] Emulator upgrade test rewrites pre-hardening sender hashes, direct identifiers
+  and full URL components; restart remains idempotent.
 - [x] Emulator verifies overlay grant/deny/revoke, preview, auto-hide, tap-through, notification channel v4, manual check, two-event Scam Memory and Agent online/offline.
+- [x] A real foreground SMS through the phone's default SMS app was user-confirmed after `cd4b4d5`; device metadata, clip and background coverage remain Pending.
 - [ ] Fresh-install physical-device smoke test passes.
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.
 - [x] Seeded demo data is visibly labelled.

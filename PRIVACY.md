@@ -65,6 +65,11 @@ history immediately in the app. Deleting local history cannot erase a copy
 that a user, Android diagnostic tool, network intermediary, or third-party
 provider may already have retained outside this app.
 
+When a pre-hardening debug installation is upgraded, SageSense runs a versioned
+one-time rewrite of retained risk rows before seeding demo data. It clears old
+sender hashes, re-filters sender/evidence text, and reduces stored links to their
+origin. The operation is idempotent and retries on a later launch if it fails.
+
 Room storage is not encrypted at rest in this prototype. A person who gains
 access to an unlocked, rooted, debugged, or otherwise compromised device may
 be able to inspect local files. Use a test device and do not enter real secrets.

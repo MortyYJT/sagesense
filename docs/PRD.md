@@ -110,6 +110,10 @@ legacy sender-hash slot, filtered evidence snippet, URL origins/domains, signal
 codes, score, level, campaign ID, seeded-demo flag. Current writes never retain a
 sender hash or a URL path/query/fragment.
 
+A DataStore-versioned startup migration reprocesses retained rows written by
+pre-hardening builds through the same filter before marking the migration
+complete; interruption leaves it eligible to retry on the next launch.
+
 `WatchlistEntry`: ID, raw and normalised value, entity type, bilingual reason, source title/URL, last seen, seeded-demo flag.
 
 ## Safety constraints

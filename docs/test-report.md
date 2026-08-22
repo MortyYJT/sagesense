@@ -12,17 +12,17 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 |---|---|---|
 | Backend | `.venv/bin/pytest -q backend/tests` | Pass: 31 tests, 0 failures |
 | Backend syntax | `.venv/bin/python -m compileall -q backend` | Pass |
-| GitHub CI | [CI run 32543747440](https://github.com/MortyYJT/sagesense/actions/runs/32543747440) for release code/docs at `0198b1d` | Pass: backend and Android jobs completed successfully |
+| GitHub CI | [CI run 32554775871](https://github.com/MortyYJT/sagesense/actions/runs/32554775871) for `cd4b4d5` | Pass: backend and Android jobs completed successfully |
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
 | Production privacy boundary | Health headers plus a synthetic invalid-locale request after deployment | Pass: `no-store`, `no-referrer`, `nosniff`, frame/permissions headers; stable 422 did not echo the marker |
-| Android JVM | `./gradlew testDebugUnitTest` | Pass: 44 tests, 0 failures/errors/skips |
+| Android JVM | `./gradlew testDebugUnitTest` | Pass: 49 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
-| Android APK | `./gradlew assembleDebug` | Pass: 21,022,720 bytes |
+| Android APK | `./gradlew assembleDebug` | Pass: 21,454,010 bytes |
 | Static integrity | `git diff --check`, JSON/XML parsing, `unzip -t` | Pass |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`
+SHA-256: `aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.
@@ -36,6 +36,8 @@ the synthetic 422 check contained no personal or production user data.
   `+61 400…` formats.
 - Room-bound sender/snippet/URL minimisation, plus OTP, password, card, account,
   email, phone and Agent-context redaction boundaries.
+- Idempotent pre-hardening history rewrite, including retry-safe link markers
+  and truncation that cannot re-expose a URL path/query on a later launch.
 - Independent FastAPI re-sanitisation, non-echoing validation errors, no-store
   security headers, deterministic anti-scam topic gating (including nested
   context), prompt-extraction rejection, schema bounds, rate limiting,
@@ -68,6 +70,7 @@ Device: `SageSense_API_37`, `sdk_gphone64_arm64`, Android 17 / API 37.
 | Overlay privacy boundary | Manifest/source audit contains no `AccessibilityService`, screen capture, OCR, full-screen intent or automatic blocking path | Pass source audit |
 | Real Google Messages path | Emulator SMS generated a Google Messages notification; SageSense stored one non-demo 100/100 event and showed the system overlay | Pass |
 | Post-merge install smoke | Rebuilt APK installed over the emulator build; a new real SMS showed the merged vector shield and tapping it opened the matching Cognitive Pause | Pass |
+| Privacy upgrade migration | Before `install -r`, a legacy row contained a sender hash, raw phone, password and URL query. Cold start rewrote it to a redacted phone, null hash, redacted password and origin-only URL; all retained rows then had 0 non-null sender hashes and 0 URL queries. A second launch was unchanged and the synthetic row was deleted. | Pass |
 | Notification de-duplication | Two identical Google Messages updates one second apart produced one additional event, not two | Pass |
 | Notification self-loop | SageSense output notifications did not re-enter the risk history | Pass |
 | Channel policy | Message v4 is importance 4 with default sound and `[0,250]` vibration; call v4 is importance 4 with no notification sound and `[0,250]`; demo v2 has neither | Pass system state |
@@ -93,7 +96,8 @@ each row. Do not replace `Pending` with `Pass` based on emulator evidence.
 | Scenario | Expected | Status |
 |---|---|---|
 | Fresh-install permission allow/deny/back | No permission loop; accurate ON/OFF state and Settings recovery | Pending |
-| Foreground/background Google Messages | Local warning, history and deep link work in both states | Pending |
+| Foreground default SMS app | Real test SMS creates the risk flow while SageSense is foregrounded | Pass (user-reported after `cd4b4d5`; device metadata and clip Pending) |
+| Background default SMS app and de-duplication | Local warning, history and deep link work while backgrounded without an event storm | Pending |
 | Watchlist call | Phone keeps ringing; warning is visible; seeded fixture is named as demo data | Pending |
 | Alert sensation | Real message is audible/vibrating; call adds no notification sound; seeded demo is silent | Pending |
 | Overlay grant/revoke/tap | Optional warning appears only when granted, auto-hides and opens the matching event | Pending |

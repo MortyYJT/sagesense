@@ -95,7 +95,7 @@ retention for non-demo events.
   the model provider degraded.
 - English, Simplified Chinese, 1.3x/2.0x font scale, ≥22sp app typography and
   ≥56dp primary touch targets are built into the release candidate.
-- The current release candidate passes 44 Android JVM tests, 31 backend tests,
+- The current release candidate passes 49 Android JVM tests, 31 backend tests,
   Android lint with zero errors, APK assembly, isolated Android 17 emulator
   acceptance and GitHub CI.
 

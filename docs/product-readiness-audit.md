@@ -20,7 +20,7 @@ submission media remain Pending.
 | Personal Scam Memory | Implemented conservatively | Requires a stable campaign/domain or at least two meaningful signals |
 | Constrained Agent | Implemented | Production query passed; offline deterministic fallback passed |
 | Bilingual and older-adult UI | Implemented | English/Chinese and 1.3x/2.0x emulator checks pass; physical TalkBack Pending |
-| Privacy controls | Implemented for prototype | Minimized Room writes, backend re-sanitisation, HTTPS release policy, bounded Agent context, public notice/threat model and no cloud history |
+| Privacy controls | Implemented for prototype | Minimized Room writes and legacy-row migration, backend re-sanitisation, HTTPS release policy, bounded Agent context, public notice/threat model and no cloud history |
 | Release build | Debug RC available | Final signing/tag is intentionally blocked on physical acceptance |
 
 ## Must finish to maximise competition score
