@@ -56,7 +56,7 @@ The Android client uses Kotlin, Jetpack Compose, Material 3, Room, DataStore,
 Coroutines and Flow. `NotificationListenerService` processes supported message
 notifications, while `CallScreeningService` performs a bounded local number
 lookup and immediately allows the call. A versioned deterministic risk engine
-produces a 0-100 score and evidence codes on-device.
+produces a 0–100 score and evidence codes on-device.
 
 The Agent backend uses Python 3.12, FastAPI and Pydantic v2. It routes
 `deepseek-v4-flash` through the team's OpenCode Go subscription from a Vercel
@@ -79,7 +79,7 @@ retention for non-demo events.
 - `CallScreeningService` can be unbound before asynchronous work finishes. We
   moved the bounded warning lookup to application scope while returning the
   allow-call response immediately.
-- Australian numbers appeared as `0400...`, `614...` and `+61 400...`; canonicalising
+- Australian numbers appeared as `0400…`, `614…` and `+61 400…`; canonicalising
   those forms was necessary for reliable local Watchlist matching.
 - A permanently floating assistant would create distraction and privacy/policy
   concerns. We changed it to an optional event-only shield that auto-hides and
@@ -94,8 +94,8 @@ retention for non-demo events.
 - A Watchlist call keeps ringing while SageSense presents a warning.
 - The demo remains usable with permissions denied, the network unavailable or
   the model provider degraded.
-- English, Simplified Chinese, 1.3x/2.0x font scale, >=22sp app typography and
-  >=56dp primary touch targets are built into the release candidate.
+- English, Simplified Chinese, 1.3x/2.0x font scale, ≥22sp app typography and
+  ≥56dp primary touch targets are built into the release candidate.
 - The current release candidate passes 49 Android JVM tests, 31 backend tests,
   Android lint with zero errors, APK assembly, isolated Android 17 emulator
   acceptance and GitHub CI.
