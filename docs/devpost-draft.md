@@ -1,9 +1,8 @@
 # Devpost submission draft
 
-Replace the remaining bracketed placeholder and attach final real-device evidence
-before submission. The core phone smoke test is user-reported in
-`test-report.md`; the demo video URL is recorded below, while the final APK or
-installation URL still requires separate verification.
+This copy matches the final Devpost draft. The core phone smoke test is
+user-reported in `test-report.md`; the public demo video, source repository and
+Android build instructions are linked below.
 
 ## Project name
 

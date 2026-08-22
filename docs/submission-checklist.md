@@ -8,6 +8,7 @@
   validation error verified after deployment.
 - [x] GitHub CI run 32554775871 passed both backend and Android jobs for `cd4b4d5`.
 - [x] Final documentation CI run 32593850128 passed both backend and Android jobs for `970f79d`.
+- [x] Final video-link documentation CI run 32597323923 passed both backend and Android jobs for `9f1757b`.
 - [x] Current Android source compiles and 49 JVM logic tests pass with the bundled Kotlin/Compose toolchain.
 - [x] Current `testDebugUnitTest`, `lintDebug` and `assembleDebug` Gradle tasks pass; fresh APK is 20,994,464 bytes with SHA-256 `4e83da80e3353657145fa7dc5436acfb2d55d9f2c21ca7447d16728de0065bbf`.
 - [x] Emulator upgrade test rewrites pre-hardening sender hashes, direct identifiers
@@ -18,7 +19,7 @@
 - [x] No API keys, personal data or real test phone numbers are present in the local source tree.
 - [x] Seeded demo data is visibly labelled.
 - [x] Public repository and raw README return successfully without authentication.
-- [x] Final submission commit is designated for an annotated `catalyst-2026-final` tag after the link audit.
+- [x] The audited Android release commit is preserved by the annotated `catalyst-2026-final` tag; the later `main` commits update documentation only.
 - [ ] Repository remains unchanged during judging.
 
 ## Documentation and licensing
@@ -44,9 +45,9 @@
 
 ## Devpost
 
-- [ ] Team name and all five members are correct.
+- [x] All five members are listed; three emailed Devpost invitations remain unconfirmed and are not treated as a submission blocker by the team lead.
 - [x] Public GitHub URL and video URL work without login.
 - [x] Final Devpost draft names the user problem, solution, innovation and limitations and contains no URL placeholders.
 - [x] Public Android setup/build instructions are linked from the Devpost draft; the local debug RC APK is ready to attach if the form allows it.
-- [ ] Curated ZIP must be regenerated from the final link-audit commit and uploaded to Devpost.
+- [x] Curated `sagesense-source-9f1757b.zip` was regenerated from the final link-audit commit, checksum-verified and uploaded to Devpost.
 - [ ] Submit internally by Sunday 09:30, 30 minutes before the official deadline.
