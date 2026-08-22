@@ -1722,7 +1722,7 @@ private fun SettingsScreen(
                 Column(Modifier.padding(18.dp)) {
                     Text(l(locale, "Agent service", "Agent 服务"), style = MaterialTheme.typography.titleMedium)
                     Text(
-                        l(locale, "DeepSeek V4 Flash · server-side key · 15 s timeout", "DeepSeek V4 Flash · 服务端密钥 · 超时 15 秒"),
+                        l(locale, "DeepSeek V4 Flash · server-side key · 30 s timeout", "DeepSeek V4 Flash · 服务端密钥 · 超时 30 秒"),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }

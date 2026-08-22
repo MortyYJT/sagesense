@@ -118,17 +118,17 @@ bubble. Notification channels were versioned to `v4` so the intended sound and
 vibration policy can take effect on installs that previously used an incompatible
 channel configuration.
 
-Current release-candidate evidence: 42 Android JVM tests and 31 backend tests
+Current release-candidate evidence: 44 Android JVM tests and 31 backend tests
 pass; Android lint reports 0 errors and 7 dependency/version-availability
 warnings; the production Agent returned `degraded=false`; and an Android 17
 emulator passed fresh-install, permission no-repeat, real Google Messages,
 ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
 online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 
-The current debug APK is 21,454,010 bytes with SHA-256
-`e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`.
+The current debug APK is 21,022,720 bytes with SHA-256
+`83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
-15-second client deadline and never contain a provider key. See the
+30-second client deadline and never contain a provider key. See the
 [test report](docs/test-report.md) for the evidence boundary and the still-
 Pending physical-device gate.
 

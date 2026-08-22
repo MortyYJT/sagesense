@@ -9,7 +9,7 @@ becomes usable video evidence.
 - Tester: `[name/initials]`
 - Phone model: `[model]`
 - Android version/API: `[version]`
-- APK SHA-256: `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`
+- APK SHA-256: `83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`
 - Start/end time: `[time]`
 - Result: `[Pass / P0 blocker / P1 blocker]`
 

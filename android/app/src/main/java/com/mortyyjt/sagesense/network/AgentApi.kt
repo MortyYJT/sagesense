@@ -111,9 +111,12 @@ class AgentClient {
     private val json = Json { ignoreUnknownKeys = true }
     private val okHttp = OkHttpClient.Builder()
         .connectTimeout(8, TimeUnit.SECONDS)
-        .readTimeout(15, TimeUnit.SECONDS)
+        // Production model responses can exceed 15 seconds during a cold start.
+        // Keep a finite ceiling so offline fallback remains predictable while
+        // allowing the deployed Agent enough time to return useful guidance.
+        .readTimeout(30, TimeUnit.SECONDS)
         .writeTimeout(8, TimeUnit.SECONDS)
-        .callTimeout(15, TimeUnit.SECONDS)
+        .callTimeout(30, TimeUnit.SECONDS)
         .build()
     private val api = Retrofit.Builder()
         .baseUrl(BuildConfig.SAGESENSE_API_BASE_URL)

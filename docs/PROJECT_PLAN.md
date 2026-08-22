@@ -25,7 +25,7 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 
 ### Complete locally
 
-- Android project has a current 21,454,010-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`.
+- Android project has a current 21,022,720-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`.
 - Notification listener, call-screening service, local risk engine, Watchlist, Personal Scam Memory and deep-linked alerts are implemented.
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.
@@ -42,7 +42,7 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 - The prototype has a process-local best-effort limiter of 8 requests/minute and 2 concurrent requests per client; durable multi-instance enforcement remains a Vercel WAF responsibility.
 - Curated knowledge retrieval now uses weighted bilingual lexical matching with stable ordering; no-match queries return no citations. No vector database is intentionally in scope for this small curated corpus.
 - Backend tests pass on the current tree: 31. Android `testDebugUnitTest` passes
-  42 tests; `lintDebug` reports 0 errors and 7 non-blocking dependency/version
+  44 tests; `lintDebug` reports 0 errors and 7 non-blocking dependency/version
   availability warnings; `assembleDebug` succeeds. This automated and emulator
   evidence is not a substitute for the still-Pending physical-device gate.
 - A debug-only, Android `DUMP`-permission-protected ADB hook can add and remove a

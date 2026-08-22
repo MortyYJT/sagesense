@@ -15,14 +15,14 @@ OEM permission UI, vibration, ringtone interaction, or TalkBack behaviour passed
 | GitHub CI | [CI run 16](https://github.com/MortyYJT/sagesense/actions/runs/32497129302) for release code/docs at `20a4e29` | Pass: backend and Android jobs completed successfully |
 | Production Agent | Health plus a redacted `POST https://sagesense.vercel.app/v1/agent/query` | Pass: HTTP 200, `deepseek-v4-flash`, `degraded=false`, safe actions and three allowlisted citations |
 | Production privacy boundary | Health headers plus a synthetic invalid-locale request after deployment | Pass: `no-store`, `no-referrer`, `nosniff`, frame/permissions headers; stable 422 did not echo the marker |
-| Android JVM | `./gradlew testDebugUnitTest` | Pass: 42 tests, 0 failures/errors/skips |
+| Android JVM | `./gradlew testDebugUnitTest` | Pass: 44 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
-| Android APK | `./gradlew assembleDebug` | Pass: 21,454,010 bytes |
+| Android APK | `./gradlew assembleDebug` | Pass: 21,022,720 bytes |
 | Static integrity | `git diff --check`, JSON/XML parsing, `unzip -t` | Pass |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `e863c99dca00077000857610c8fb329cf7175f42cb827d7e0508050c8fd95f79`
+SHA-256: `83fca47501ff322d1eafdc6b4b75e2d632272718388d03f2c2afc8b39e10d6f2`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.
@@ -78,7 +78,7 @@ Device: `SageSense_API_37`, `sdk_gphone64_arm64`, Android 17 / API 37.
 | Call overlay and copy | Red shield appeared over the ringing call; tap opened Cognitive Pause with `Call not blocked` / `电话未被拦截` | Pass |
 | Manual local check | A pasted risky message produced the local Cognitive Pause and history event without an Agent request | Pass |
 | Personal Scam Memory | Two labelled demo messages with changed sender/domain were related by multiple stable risk signals | Pass |
-| Agent online | Installed app called the production endpoint and rendered a plain-language answer, safe actions and official sources with `degraded=false` | Pass |
+| Agent online | Installed app completed the production request within the 30-second client ceiling and rendered a relevant answer, safe actions and official sources. That invocation was marked `degraded=true`; the direct production check above separately returned provider-backed `degraded=false` | Pass with truthful degraded-state label |
 | Agent offline | Airplane mode produced a safe local-evidence explanation; risk detail remained available | Pass |
 | Delete all history | Room event count changed to zero while both seeded Watchlist rows remained | Pass |
 | English/Chinese | Primary UI, Agent and warning copy changed without restart; the whole language row is tappable | Pass |
