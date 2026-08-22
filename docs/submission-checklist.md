@@ -49,5 +49,5 @@
 - [x] Public GitHub URL and video URL work without login.
 - [x] Final Devpost draft names the user problem, solution, innovation and limitations and contains no URL placeholders.
 - [x] Public Android setup/build instructions are linked from the Devpost draft; the local debug RC APK is ready to attach if the form allows it.
-- [x] Curated `sagesense-source-9f1757b.zip` was regenerated from the final link-audit commit, checksum-verified and uploaded to Devpost.
+- [x] The curated source ZIP was regenerated from the final link-audit commit, checksum-verified and uploaded to Devpost.
 - [ ] Submit internally by Sunday 09:30, 30 minutes before the official deadline.
