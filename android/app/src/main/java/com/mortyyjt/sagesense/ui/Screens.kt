@@ -1616,8 +1616,8 @@ private fun SettingsScreen(
                     Text(
                         l(
                             locale,
-                            "Automatic message checks support Google Messages and AOSP SMS. The Watchlist contains labelled demo fixtures, not a live threat-intelligence feed. Risk scores are warnings, not proof of fraud.",
-                            "自动消息检测支持 Google Messages 和 AOSP 短信。观察名单包含明确标记的演示数据，并非实时威胁情报。风险分只是警告，不是诈骗定论。",
+                            "Automatic message checks support your default SMS app, Google Messages and AOSP SMS. The Watchlist contains labelled demo fixtures, not a live threat-intelligence feed. Risk scores are warnings, not proof of fraud.",
+                            "自动消息检测支持你的默认短信应用、Google Messages 和 AOSP 短信。观察名单包含明确标记的演示数据，并非实时威胁情报。风险分只是警告，不是诈骗定论。",
                         ),
                         style = MaterialTheme.typography.bodyMedium,
                     )

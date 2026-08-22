@@ -1,6 +1,7 @@
 package com.mortyyjt.sagesense.service
 
 import android.app.Notification
+import android.provider.Telephony
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import com.mortyyjt.sagesense.SageSenseApplication
@@ -27,12 +28,13 @@ class SageNotificationListenerService : NotificationListenerService() {
             AlertNotifier.isSageSenseRiskChannel(sbn.notification.channelId) ||
             sbn.notification.extras.getBoolean(AlertNotifier.RISK_OUTPUT_EXTRA, false)
         ) return
-        val allowedPackages = setOf(
-            "com.google.android.apps.messaging",
-            "com.android.mms",
-            packageName,
-        )
-        if (sbn.packageName !in allowedPackages) return
+        if (
+            !MessageNotificationPolicy.isSupportedPackage(
+                sourcePackage = sbn.packageName,
+                defaultSmsPackage = Telephony.Sms.getDefaultSmsPackage(this),
+                sageSensePackage = packageName,
+            )
+        ) return
 
         val extras = sbn.notification.extras
         val title = extras.getCharSequence(Notification.EXTRA_TITLE)?.toString()
