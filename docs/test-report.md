@@ -1,6 +1,6 @@
 # Test report
 
-Last updated: 2026-08-22 (Australia/Melbourne).
+Last updated: 2026-08-23 (Australia/Melbourne).
 
 This report separates automated, Android-emulator and user-reported physical-
 device evidence. A passing emulator run is never used as evidence for a real
@@ -17,12 +17,12 @@ phone's OEM permission UI, vibration, ringtone interaction or TalkBack behaviour
 | Production privacy boundary | Health headers plus a synthetic invalid-locale request after deployment | Pass: `no-store`, `no-referrer`, `nosniff`, frame/permissions headers; stable 422 did not echo the marker |
 | Android JVM | `./gradlew testDebugUnitTest` | Pass: 49 tests, 0 failures/errors/skips |
 | Android lint | `./gradlew lintDebug` | Pass: 0 errors; 7 non-blocking dependency/version-availability warnings |
-| Android APK | `./gradlew assembleDebug` | Pass: 21,454,010 bytes |
+| Android APK | `./gradlew assembleDebug` | Pass: 20,994,464 bytes |
 | Static integrity | `git diff --check`, JSON/XML parsing, `unzip -t` | Pass |
 
 Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk`
 
-SHA-256: `aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`
+SHA-256: `4e83da80e3353657145fa7dc5436acfb2d55d9f2c21ca7447d16728de0065bbf`
 
 The generated APK targets the production demo backend at
 `https://sagesense.vercel.app/`. The provider key remains server-side.

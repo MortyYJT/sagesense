@@ -50,6 +50,10 @@ Local detection, history and deterministic safety guidance continue to work
 offline. The Agent explains a local risk event; it does not block calls, make
 payments, contact organisations or declare a transaction safe.
 
+The phone number, domain and scam messages shown in the pitch are clearly
+labelled demonstration fixtures. They are not reports about real people or a
+claim that SageSense contains live threat intelligence.
+
 ## How we built it
 
 The Android client uses Kotlin, Jetpack Compose, Material 3, Room, DataStore,
@@ -132,7 +136,7 @@ DeepSeek V4 Flash · OpenCode Go · Vercel
   `docs/sources.md`.
 - Source: <https://github.com/MortyYJT/sagesense>
 - Video: <https://youtu.be/vICMmT2Kj7s>
-- APK or installation instructions: `[APK_URL_OR_RELEASE_URL]`
+- Installation and build instructions: <https://github.com/MortyYJT/sagesense#run-android>
 
 ## Team
 

@@ -26,7 +26,7 @@ Jiahui Zhou owns UI files while her branch is active. Yijia Sheng must not edit 
 
 ### Complete locally
 
-- Android project has a current 21,454,010-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`.
+- Android project has a current 20,994,464-byte debug RC with Kotlin, Compose, Room, DataStore and manual dependency injection. Its SHA-256 is `4e83da80e3353657145fa7dc5436acfb2d55d9f2c21ca7447d16728de0065bbf`.
 - Notification listener, call-screening service, local risk engine, Watchlist, Personal Scam Memory and deep-linked alerts are implemented.
 - Home, History, Watchlist, event detail, Agent, Learn and Settings flows are implemented in English and Chinese.
 - FastAPI health and Agent endpoints, DeepSeek V4 Flash tool loop, citation allowlist and deterministic fallback are implemented.

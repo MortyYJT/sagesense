@@ -9,6 +9,8 @@ SageSense is an Android anti-scam companion designed for older adults. With expl
 > user-reported core physical-device checks. No P0/P1 issue was reported in the
 > final phone smoke test; remaining work is submission media and packaging.
 
+Demo video (4:52, 1080p): <https://youtu.be/vICMmT2Kj7s>
+
 ## Demo story
 
 1. A clearly labelled seeded bank-impersonation notification appears.
@@ -125,8 +127,8 @@ emulator passed fresh-install, permission no-repeat, real Google Messages,
 ringing Watchlist call, transient overlay, de-duplication, Personal Scam Memory,
 online/offline Agent, bilingual, 1.3x/2.0x text and delete-history scenarios.
 
-The current debug APK is 21,454,010 bytes with SHA-256
-`aabcc3d26a80d61f6db22fea051b3b1b2bffe3357dd077edcbcbf725dfad1f9a`.
+The current debug APK is 20,994,464 bytes with SHA-256
+`4e83da80e3353657145fa7dc5436acfb2d55d9f2c21ca7447d16728de0065bbf`.
 It is configured for `https://sagesense.vercel.app/`; Agent calls have a
 30-second client deadline and never contain a provider key. On 22 August 2026,
 the team lead reported a passing physical-phone smoke test for first-launch
